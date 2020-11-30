@@ -53,6 +53,8 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 	}
 	
 	
+	
+	
 
 	public static void main(String[] args) throws IOException{
 		Assembleur assem = new Assembleur();
@@ -65,6 +67,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 		ArrayList<String> registresCourant = new ArrayList<>();
 		ArrayList<String> valeurs = new ArrayList<>();
 		ArrayList<Integer> valeurBinaire;
+		int oui;
 		
 		while ((line = in.readLine()) != null){
 			lignes++;
