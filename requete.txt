@@ -1,0 +1,103 @@
+ldr      R0#150
+ldr R1#50
+ldr R2#-500
+ldr R3#50
+if: BEQ R0,R1
+	yolo
+	yolo
+	yolo
+else: 
+	pas yolo
+	pas yolo
+
+
+
+if: BNE    R2,R3
+
+
+
+else:
+if: BCS R0,R1
+	yolo
+	yolo
+	yolo
+else: 
+	pas yolo
+	pas yolo
+if: BCC R0,R1
+	yolo
+	yolo
+	yolo
+else: 
+	pas yolo
+	pas yolo
+if: BMI R0,R1
+	yolo
+	yolo
+	yolo
+else: 
+	pas yolo
+	pas yolo
+if: BPL R0,R1
+	yolo
+	yolo
+	yolo
+else: 
+	pas yolo
+	pas yolo
+if: BVS R0,R1
+	yolo
+	yolo
+	yolo
+else: 
+	pas yolo
+	pas yolo
+if: BVC R0,R1
+	yolo
+	yolo
+	yolo
+else: 
+	pas yolo
+	pas yolo
+if: BHI R0,R1
+	yolo
+	yolo
+	yolo
+else: 
+	pas yolo
+	pas yolo
+if: BLS R0,R1
+	yolo
+	yolo
+	yolo
+else: 
+	pas yolo
+	pas yolo
+if: BGE R0,R1
+	yolo
+	yolo
+	yolo
+else: 
+	pas yolo
+	pas yolo
+if: BLT R0,R1
+	yolo
+	yolo
+	yolo
+else: 
+	pas yolo
+	pas yolo
+if: BGT R0,R1
+	yolo
+	yolo
+	yolo
+else: 
+	pas yolo
+	pas yolo
+if: BLE R0,R1
+	yolo
+	yolo
+	yolo
+else: 
+	pas yolo
+	pas yolo
