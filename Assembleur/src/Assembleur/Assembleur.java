@@ -144,6 +144,8 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 			String rNrM;
 			ArrayList<Integer> constructionRegistre = new ArrayList<Integer>();;
 			ArrayList<Integer> constructionImm = new ArrayList<Integer>();;
+			assem.setNegative(0);
+			assem.setOverflow(0);
 			//String[] rNrMDef;
 			
 			for (int i = 0; i < spltEs.length; i++) {
@@ -171,6 +173,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								 }
 								 affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								 System.out.println();
+								 assem.setNegative(0);
+								 assem.setOverflow(0);
+								 assem.setCarry(0);
 								 break;
 								 		
 					case "BNE" : System.out.println("BNE");							//BNE = different, meme model que BEQ
@@ -191,6 +196,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								 }
 					 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								 System.out.println();
+								 assem.setNegative(0);
+								 assem.setOverflow(0);
+								 assem.setCarry(0);
 								 break;
 					 			 
 					case "BVS" : System.out.println("BVS");							//BCS = retenue
@@ -209,6 +217,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 					 			 }
 					 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 					 			System.out.println();
+					 			assem.setNegative(0);
+								 assem.setOverflow(0);
+								 assem.setCarry(0);
 					 			break;
 					
 					case "BVC" : System.out.println("BVC"); 						//BCC = sans retenue
@@ -227,6 +238,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 		 			 			}
 		 			 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 		 			 			System.out.println();
+		 			 			assem.setNegative(0);
+								 assem.setOverflow(0);
+								 assem.setCarry(0);
 		 			 			break;
 		 			
 					case "BMI" : System.out.println("BMI"); 						//BCC = négatif
@@ -247,6 +261,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								}
 								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
+								assem.setNegative(0);
+								 assem.setOverflow(0);
+								 assem.setCarry(0);
 								break;
 								
 					case "BPL" : System.out.println("BPL"); 						//BCC = négatif
@@ -267,6 +284,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								}
 								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
+								assem.setNegative(0);
+								 assem.setOverflow(0);
+								 assem.setCarry(0);
 								break;
 								
 								
@@ -286,6 +306,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								}
 								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
+								assem.setNegative(0);
+								 assem.setOverflow(0);
+								 assem.setCarry(0);
 								break;
 						
 					case "BCC" :System.out.println("BCC");							//BCS = retenue
@@ -303,6 +326,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								}
 								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
+								assem.setNegative(0);
+								 assem.setOverflow(0);
+								 assem.setCarry(0);
 								break;
 								
 					case "BHI" :System.out.println("BHI");							//BCS = retenue
@@ -321,6 +347,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								}
 								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
+								assem.setNegative(0);
+								 assem.setOverflow(0);
+								 assem.setCarry(0);
 								break;
 						
 					case "BLS" :System.out.println("BLS");							//BCS = retenue
@@ -339,6 +368,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								}
 								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
+								assem.setNegative(0);
+								 assem.setOverflow(0);
+								 assem.setCarry(0);
 								break;
 						
 					case "BGE" :System.out.println("BGE");							//BCS = retenue
@@ -360,6 +392,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								
 								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
+								assem.setNegative(0);
+								 assem.setOverflow(0);
+								 assem.setCarry(0);
 								break;
 								
 					case "BLT" :System.out.println("BLT");							//BCS = retenue
@@ -380,6 +415,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								}
 								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
+								assem.setNegative(0);
+								 assem.setOverflow(0);
+								 assem.setCarry(0);
 								break;
 						
 					case "BGT" :System.out.println("BGT");							//BCS = retenue
@@ -399,6 +437,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								}
 								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
+								assem.setNegative(0);
+								 assem.setOverflow(0);
+								 assem.setCarry(0);
 								break;
 								
 					case "BLE" :System.out.println("BLE");							//BCS = retenue
@@ -419,6 +460,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								}
 								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
+								assem.setNegative(0);
+								 assem.setOverflow(0);
+								 assem.setCarry(0);
 								break;
 						
 					case "LSLS" : System.out.println("LSLS");
@@ -450,6 +494,9 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								  
 								  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								  System.out.println();
+								  assem.setNegative(0);
+								  assem.setOverflow(0);
+								  assem.setCarry(0);
 								  break;
 					default : break;
 				}
