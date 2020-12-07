@@ -169,7 +169,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									 conditionElse(assem, elses, valeurBinaire, j);
 									 j++;
 								 }
-								 affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+								 affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								 System.out.println();
 								 break;
 								 		
@@ -189,7 +189,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									 conditionElse(assem, elses, valeurBinaire, j);
 									 j++;
 								 }
-					 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+					 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								 System.out.println();
 								 break;
 					 			 
@@ -207,7 +207,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 					 				conditionElse(assem, elses, valeurBinaire, j);
 									j++;
 					 			 }
-					 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+					 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 					 			System.out.println();
 					 			break;
 					
@@ -225,7 +225,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 		 			 				conditionElse(assem, elses, valeurBinaire, j);
 		 			 				j++;
 		 			 			}
-		 			 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+		 			 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 		 			 			System.out.println();
 		 			 			break;
 		 			
@@ -245,7 +245,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									j++;
 									assem.setNegative(0);
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
 								break;
 								
@@ -265,7 +265,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									j++;
 									assem.setNegative(1);
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
 								break;
 								
@@ -284,7 +284,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									conditionElse(assem, elses, valeurBinaire, j);
 									j++;
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
 								break;
 						
@@ -301,7 +301,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									conditionElse(assem, elses, valeurBinaire, j);
 									j++;
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
 								break;
 								
@@ -319,7 +319,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									conditionElse(assem, elses, valeurBinaire, j);
 									j++;
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
 								break;
 						
@@ -337,7 +337,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									conditionElse(assem, elses, valeurBinaire, j);
 									j++;
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
 								break;
 						
@@ -358,7 +358,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									assem.setNegative(0);
 								}
 								
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
 								break;
 								
@@ -378,7 +378,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									assem.setNegative(1);
 									j++;
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
 								break;
 						
@@ -397,7 +397,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									conditionElse(assem, elses, valeurBinaire, j);
 									j++;
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
 								break;
 								
@@ -417,7 +417,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									assem.setNegative(0);
 									j++;
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								System.out.println();
 								break;
 						
@@ -448,7 +448,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM + RD
 								  //System.out.println("\nfinal = ");
 								  
-								  affich(valeurBinaire, assem.getCarry(), assem.getOverflow());
+								  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
 								  System.out.println();
 								  break;
 					default : break;
@@ -464,14 +464,14 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 	
 	
 	
-	private static void affich(ArrayList<Integer> valeurBinaire, int carry, int overflow) {
+	private static void affich(ArrayList<Integer> valeurBinaire, int carry, int overflow, int negative) {
 		
 		for (int p : valeurBinaire) {
 			System.out.print(p);
 		}
 		System.out.println("\n(Carry) C : "+carry);
 		System.out.println("(oVerflow) V : "+overflow);
-		System.out.println("(Negative) N : ");
+		System.out.println("(Negative) N : "+negative);
 		
 	}
 	
