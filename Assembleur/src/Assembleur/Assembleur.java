@@ -10,6 +10,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 	public int overflow;
 	public int carry;
 	public int negative;
+	public int nul;
 	
 	ArrayList<Integer> b(){ //mnemonique dédié aux 15 requetes B
 		mnemonique = new ArrayList<>();
@@ -24,10 +25,6 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 	ArrayList<Integer> descr(){ //mnemonique dédié aux 3 requetes Description
 		mnemonique = new ArrayList<>();
 		System.out.println();
-		//mnemonique.add(0);
-		//mnemonique.add(1);
-		//mnemonique.add(0);
-		//mnemonique.add(0);
 		mnemonique.add(0);
 		mnemonique.add(0);
 		//System.out.print("mnemonique = ");affich(mnemonique);
@@ -49,16 +46,11 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 	void fromLinesToBinary (ArrayList<Integer> ab, int lines, int bit) {			//Depuis le nb de lignes de l'étiquette, renvoie la liste avec les 8 bit de imm8 remplis
 		int binary = Integer.parseInt(Integer.toBinaryString(lines));	//convertit la ligne de l'etiquette en binaire
 		convBinaire(ab,lines,bit);										//ajoute les x 0 devant pour donner la valeur sur 8 bits, en fonction du nb de lignes en base 10
-		//System.out.println("binary = "+binary);
-		//System.out.println("valeur ab = "+ab);
 		String binaryS = String.valueOf(binary);
 		String[] binarySplt = binaryS.split("");
-		//System.out.println("omg ?"+binarySplt[0]+" "+binarySplt[1]+" "+binarySplt[2]);
 		for (int i = 0; i < binarySplt.length; i++) {					//on split pour avoir une valeur de type [1,1,1] plutot que [111]
-			//System.out.println("oui : "+binarySplt[i]);
-			ab.add(Integer.parseInt(binarySplt[i]));
-		}
-		//ab.add(binary);													//ajoute la valeur binaire des lignes dans la liste
+			ab.add(Integer.parseInt(binarySplt[i]));					//ajoute la valeur binaire des lignes dans la liste
+		}								
 	}
 	
 	int isOverflow(int a, int b) {
@@ -100,6 +92,15 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 	public int getNegative() {
 		return this.negative;
 	}
+	
+	public void setNul(int valeur) {
+		this.nul = valeur;
+	}
+	
+	public int getNul() {
+		return this.nul;
+	}
+	
 
 	public static void main(String[] args) throws IOException{
 		Assembleur assem = new Assembleur();
@@ -132,9 +133,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 		BufferedReader in2 = new BufferedReader(new FileReader("D:\\enzod\\Polytech\\Archi\\requete.txt"));
 		String line2;
 		int j = 0; 					//cette valeur représente l'indice unique de chaque etiquettes, on va l'incrementer a chaque fois qu'on en traite une (sembable a un .remove dans la liste)
-		//System.out.println("avant while");
 		while ((line2 = in2.readLine()) != null){
-			//System.out.println("while");
 			String[] spltEs = line2.split(" ");
 			String[] registreCourSplit;
 			int registre1;
@@ -146,7 +145,6 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 			ArrayList<Integer> constructionImm = new ArrayList<Integer>();;
 			assem.setNegative(0);
 			assem.setOverflow(0);
-			//String[] rNrMDef;
 			
 			for (int i = 0; i < spltEs.length; i++) {
 				switch(spltEs[i]) {
@@ -171,11 +169,13 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									 conditionElse(assem, elses, valeurBinaire, j);
 									 j++;
 								 }
-								 affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+								 assem.setNul(1);
+								 affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								 System.out.println();
 								 assem.setNegative(0);
 								 assem.setOverflow(0);
 								 assem.setCarry(0);
+								 assem.setNul(0);
 								 break;
 								 		
 					case "BNE" : System.out.println("BNE");							//BNE = different, meme model que BEQ
@@ -194,11 +194,13 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									 conditionElse(assem, elses, valeurBinaire, j);
 									 j++;
 								 }
-					 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+					 			assem.setNul(0);
+					 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								 System.out.println();
 								 assem.setNegative(0);
 								 assem.setOverflow(0);
 								 assem.setCarry(0);
+								 assem.setNul(0);
 								 break;
 					 			 
 					case "BVS" : System.out.println("BVS");							//BCS = retenue
@@ -215,11 +217,12 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 					 				conditionElse(assem, elses, valeurBinaire, j);
 									j++;
 					 			 }
-					 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+					 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 					 			System.out.println();
 					 			assem.setNegative(0);
 								 assem.setOverflow(0);
 								 assem.setCarry(0);
+								 assem.setNul(0);
 					 			break;
 					
 					case "BVC" : System.out.println("BVC"); 						//BCC = sans retenue
@@ -236,11 +239,12 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 		 			 				conditionElse(assem, elses, valeurBinaire, j);
 		 			 				j++;
 		 			 			}
-		 			 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+		 			 			affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 		 			 			System.out.println();
 		 			 			assem.setNegative(0);
 								 assem.setOverflow(0);
 								 assem.setCarry(0);
+								 assem.setNul(0);
 		 			 			break;
 		 			
 					case "BMI" : System.out.println("BMI"); 						//BCC = négatif
@@ -259,11 +263,12 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									j++;
 									assem.setNegative(0);
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								System.out.println();
 								assem.setNegative(0);
 								 assem.setOverflow(0);
 								 assem.setCarry(0);
+								 assem.setNul(0);
 								break;
 								
 					case "BPL" : System.out.println("BPL"); 						//BCC = négatif
@@ -282,11 +287,12 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									j++;
 									assem.setNegative(1);
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								System.out.println();
 								assem.setNegative(0);
 								 assem.setOverflow(0);
 								 assem.setCarry(0);
+								 assem.setNul(0);
 								break;
 								
 								
@@ -304,11 +310,12 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									conditionElse(assem, elses, valeurBinaire, j);
 									j++;
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								System.out.println();
 								assem.setNegative(0);
 								 assem.setOverflow(0);
 								 assem.setCarry(0);
+								 assem.setNul(0);
 								break;
 						
 					case "BCC" :System.out.println("BCC");							//BCS = retenue
@@ -324,11 +331,12 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									conditionElse(assem, elses, valeurBinaire, j);
 									j++;
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								System.out.println();
 								assem.setNegative(0);
 								 assem.setOverflow(0);
 								 assem.setCarry(0);
+								 assem.setNul(0);
 								break;
 								
 					case "BHI" :System.out.println("BHI");							//BCS = retenue
@@ -340,16 +348,19 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 			 
 								if (assem.getCarry() == 1 ||(Integer.parseInt(valeurs.get(registre1))) > (Integer.parseInt(valeurs.get(registre2)))  ) { //il y a une retenue
 									conditionIf(assem, ifs, valeurBinaire,j);
+									assem.setNul(0);
 									j++;
 								}else {
 									conditionElse(assem, elses, valeurBinaire, j);
+									assem.setNul(1);
 									j++;
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								System.out.println();
 								assem.setNegative(0);
 								 assem.setOverflow(0);
 								 assem.setCarry(0);
+								 assem.setNul(0);
 								break;
 						
 					case "BLS" :System.out.println("BLS");							//BCS = retenue
@@ -361,16 +372,19 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
  
 								if (assem.getCarry() == 0 || (Integer.parseInt(valeurs.get(registre1))) <= (Integer.parseInt(valeurs.get(registre2)))  ) { //il y a une retenue
 									conditionIf(assem, ifs, valeurBinaire,j);
+									assem.setNul(1);
 									j++;
 								}else {
 									conditionElse(assem, elses, valeurBinaire, j);
+									assem.setNul(0);
 									j++;
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								System.out.println();
 								assem.setNegative(0);
 								 assem.setOverflow(0);
 								 assem.setCarry(0);
+								 assem.setNul(0);
 								break;
 						
 					case "BGE" :System.out.println("BGE");							//BCS = retenue
@@ -390,11 +404,12 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									assem.setNegative(0);
 								}
 								
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								System.out.println();
 								assem.setNegative(0);
 								 assem.setOverflow(0);
 								 assem.setCarry(0);
+								 assem.setNul(0);
 								break;
 								
 					case "BLT" :System.out.println("BLT");							//BCS = retenue
@@ -413,11 +428,12 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									assem.setNegative(1);
 									j++;
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								System.out.println();
 								assem.setNegative(0);
 								 assem.setOverflow(0);
 								 assem.setCarry(0);
+								 assem.setNul(0);
 								break;
 						
 					case "BGT" :System.out.println("BGT");							//BCS = retenue
@@ -430,16 +446,18 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									conditionIf(assem, ifs, valeurBinaire,j);
 									assem.setNegative(0);
 									assem.setOverflow(0);
+									assem.setNul(0);
 									j++;
 								}else {
 									conditionElse(assem, elses, valeurBinaire, j);
 									j++;
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								System.out.println();
 								assem.setNegative(0);
 								 assem.setOverflow(0);
 								 assem.setCarry(0);
+								 assem.setNul(0);
 								break;
 								
 					case "BLE" :System.out.println("BLE");							//BCS = retenue
@@ -458,11 +476,12 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 									assem.setNegative(0);
 									j++;
 								}
-								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+								affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								System.out.println();
 								assem.setNegative(0);
 								 assem.setOverflow(0);
 								 assem.setCarry(0);
+								 assem.setNul(0);
 								break;
 						
 					case "LSLS" : System.out.println("LSLS");
@@ -474,30 +493,94 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								  registre1 = registres.indexOf(registreCourSplit[0]);
 								  registre2 = registres.indexOf(registreCourSplit[1]);
 								  
-								  if((Integer.parseInt(valeurs.get(registre1))> 127 )) { //le S de lslS, update les flags
-									  assem.setOverflow(1);
-								  }
-								  if((Integer.parseInt(valeurs.get(registre1))< -128 || Integer.parseInt(valeurs.get(registre1))> 127  )) { //le S de lslS, update les flags
-									  assem.setCarry(1);
-								  }
+								  //if((Integer.parseInt(valeurs.get(registre1))> 127 )) { //le S de lslS, update les flags //PAS SUR DU BAILS
+									//  assem.setOverflow(1);
+								  //}
+								  //if((Integer.parseInt(valeurs.get(registre1))< -128 || Integer.parseInt(valeurs.get(registre1))> 127  )) { //le S de lslS, update les flags //PAS SUR DU BAILS
+									//  assem.setCarry(1);
+								  //}
+								  
 								  assem.fromLinesToBinary(constructionRegistre, Integer.parseInt(valeurs.get(registre1)), 3); //  R1 binaire = Rm (R0 = R8 = Rd)
 								  assem.fromLinesToBinary(constructionImm, Integer.parseInt(imm), 5); // imm binaire
-								  //System.out.println("\nimm5 = "+constructionImm);
 								  valeurBinaire.addAll(constructionImm); // mnemonique + id + imm5
-								  //System.out.println("\nmnemonique + id + imm5 = ");affich(valeurBinaire);
 								  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
-								  constructionImm = shiftLeft(constructionRegistre, Integer.parseInt(imm)); //new registre
+								  constructionImm = shiftLeft(constructionRegistre, Integer.parseInt(imm), assem); //new registre
 								  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM
-								  //System.out.println("\nmnemonique + id + imm5 + R1 = ");affich(valeurBinaire);
 								  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM + RD
-								  //System.out.println("\nfinal = ");
 								  
-								  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative());
+								  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								  System.out.println();
 								  assem.setNegative(0);
 								  assem.setOverflow(0);
 								  assem.setCarry(0);
+								  assem.setNul(0);
 								  break;
+								  
+								  
+					case "LSRS" : System.out.println("LSRS");
+								  valeurBinaire = initDescr(assem, 1);
+								  spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
+								  rNrM = spltHas[0];
+								  imm = spltHas[1];
+								  registreCourSplit = spltHas[0].split(",");
+								  registre1 = registres.indexOf(registreCourSplit[0]);
+								  registre2 = registres.indexOf(registreCourSplit[1]);
+								  
+								  //if((Integer.parseInt(valeurs.get(registre1))> 127 )) { //le S de lslS, update les flags //PAS SUR DU BAILS
+									//  assem.setOverflow(1);
+								  //}
+								  //if((Integer.parseInt(valeurs.get(registre1))< -128 || Integer.parseInt(valeurs.get(registre1))> 127  )) { //le S de lslS, update les flags //PAS SUR DU BAILS
+									//  assem.setCarry(1);
+								  //}
+								  
+								  assem.fromLinesToBinary(constructionRegistre, Integer.parseInt(valeurs.get(registre1)), 3); //  R1 binaire = Rm (R0 = R8 = Rd)
+								  assem.fromLinesToBinary(constructionImm, Integer.parseInt(imm), 5); // imm binaire
+								  valeurBinaire.addAll(constructionImm); // mnemonique + id + imm5
+								  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
+								  constructionImm = shiftRight(constructionRegistre, Integer.parseInt(imm), assem); //new registre
+								  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM
+								  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM + RD
+								  
+								  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
+								  System.out.println();
+								  assem.setNegative(0);
+								  assem.setOverflow(0);
+								  assem.setCarry(0);
+								  assem.setNul(0);
+								  break;
+						
+					case "ASRS" : System.out.println("ASRS");
+					  			  valeurBinaire = initDescr(assem, 2);
+					  			  spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
+					  			  rNrM = spltHas[0];
+					  			  imm = spltHas[1];
+					  			  registreCourSplit = spltHas[0].split(",");
+					  			  registre1 = registres.indexOf(registreCourSplit[0]);
+					  			  registre2 = registres.indexOf(registreCourSplit[1]);
+					  
+					  			  //if((Integer.parseInt(valeurs.get(registre1))> 127 )) { //le S de lslS, update les flags //PAS SUR DU BAILS
+					  				//  assem.setOverflow(1);
+					  			  //}
+					  			  //if((Integer.parseInt(valeurs.get(registre1))< -128 || Integer.parseInt(valeurs.get(registre1))> 127  )) { //le S de lslS, update les flags //PAS SUR DU BAILS
+					  				//  assem.setCarry(1);
+					  			  //}
+					  			  
+					  			  assem.fromLinesToBinary(constructionRegistre, Integer.parseInt(valeurs.get(registre1)), 3); //  R1 binaire = Rm (R0 = R8 = Rd)
+					  			  assem.fromLinesToBinary(constructionImm, Integer.parseInt(imm), 5); // imm binaire
+					  			  valeurBinaire.addAll(constructionImm); // mnemonique + id + imm5
+					  			  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
+					  			  constructionImm = shiftRightFlag(constructionRegistre, Integer.parseInt(imm), assem.getCarry(), assem); //new registre
+					  			  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM
+					  			  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM + RD
+					  
+					  			  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
+					  			  System.out.println();
+					  			  assem.setNegative(0);
+					  			  assem.setOverflow(0);
+					  			  assem.setCarry(0);
+					  			  assem.setNul(0);
+					  			  break;
+						
 					default : break;
 				}
 			}
@@ -511,7 +594,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 	
 	
 	
-	private static void affich(ArrayList<Integer> valeurBinaire, int carry, int overflow, int negative) {
+	private static void affich(ArrayList<Integer> valeurBinaire, int carry, int overflow, int negative, int nul) {
 		
 		for (int p : valeurBinaire) {
 			System.out.print(p);
@@ -519,6 +602,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 		System.out.println("\n(Carry) C : "+carry);
 		System.out.println("(oVerflow) V : "+overflow);
 		System.out.println("(Negative) N : "+negative);
+		System.out.println("(Zero) Z : "+nul);
 		
 	}
 	
@@ -540,14 +624,38 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 		assem.fromLinesToBinary(valeurBinaire, ifss,8);
 	}
 	
-	private static ArrayList<Integer> shiftLeft(ArrayList<Integer> liste,int imm5){ //R1, imm
+	private static ArrayList<Integer> shiftLeft(ArrayList<Integer> liste,int imm5, Assembleur assem){ //R1, imm
+		assem.setOverflow(0); //overflow tjr egal a 0 lors de decalage a gauche
 		ArrayList<Integer> tempo = new ArrayList<Integer>();
-		//ArrayList<Integer> imm5 = null;
-		
-		for (int i = 0 ; i < imm5; i++) {tempo.add(0);} //on ajoute les 0
-		tempo.addAll(liste);
-		//affich(tempo);
-		for (int j = tempo.size()-1; j > 2; j--) {tempo.remove(j);} //on retire le surplus, a partir de 2 car c'est l'indice nb 3, hors c'est codé sur 3 bits
+		for (int i = 0 ; i < imm5; i++) {tempo.add(0);} //on ajoute les 0 au debut																			//RM = 111
+		tempo.addAll(liste);																																//RM = 000111
+		assem.setCarry(tempo.get(3)); //la retenue est égale au dernier bit sortant
+		for (int j = tempo.size()-1; j > 2; j--) {tempo.remove(j);} //on retire le surplus, a partir de 2 car c'est l'indice nb 3, or c'est codé sur 3 bits	//RM = 000
+		if (tempo.contains(1)){assem.setNul(0);}
+		else {assem.setNul(1);}
+		return tempo;
+	}
+	
+	private static ArrayList<Integer> shiftRight(ArrayList<Integer> liste,int imm5, Assembleur assem){
+		assem.setOverflow(0); //overflow tjr egal a 0 lors de decalage a droite
+		ArrayList<Integer> tempo = new ArrayList<Integer>();
+		ArrayList<Integer> tempo2 = new ArrayList<Integer>();
+		tempo.addAll(liste);																//RM = 	  111
+		for (int i = 0; i < imm5; i++) {tempo.add(0);} //on ajoute les 0 a la fin			//RD = 111000
+		assem.setCarry(tempo.get(tempo.size() - 4)); 	//la retenue est égale au dernier bit sortant
+		for (int j = tempo.size() - 3; j < tempo.size(); j++) {tempo2.add(tempo.get(j));}	//RD = 	  000
+		if (tempo2.contains(1)){assem.setNul(0);}
+		else {assem.setNul(1);}
+		return tempo2;
+	}
+	
+	private static ArrayList<Integer> shiftRightFlag(ArrayList<Integer> liste,int imm5, int carry, Assembleur assem){
+		ArrayList<Integer> tempo = new ArrayList<Integer>();
+		tempo = shiftRight(liste,imm5,assem);
+		tempo.remove(2);
+		tempo.add(assem.getCarry()); //le dernier bit est la valeur de la retenue
+		if (tempo.contains(1)){assem.setNul(0);}
+		else {assem.setNul(1);}
 		return tempo;
 	}
 
