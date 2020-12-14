@@ -117,7 +117,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 		Assembleur assem = new Assembleur();
 		ConverterBinHex converterBinHex = new ConverterBinHex();
 		
-		BufferedReader in = new BufferedReader(new FileReader("D:\\enzod\\Polytech\\Archi\\requete.txt"));
+		BufferedReader in = new BufferedReader(new FileReader("res/requete.txt"));
 		String line;
 		ArrayList<Integer> ifs = new ArrayList<>();
 		ArrayList<Integer> elses = new ArrayList<>();
@@ -143,7 +143,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 		}
 		in.close();
 		
-		BufferedReader in2 = new BufferedReader(new FileReader("D:\\enzod\\Polytech\\Archi\\requete.txt"));
+		BufferedReader in2 = new BufferedReader(new FileReader("res/requete.txt"));
 		String line2;
 		int j = 0; 					//cette valeur représente l'indice unique de chaque etiquettes, on va l'incrementer a chaque fois qu'on en traite une (sembable a un .remove dans la liste)
 		while ((line2 = in2.readLine()) != null){
