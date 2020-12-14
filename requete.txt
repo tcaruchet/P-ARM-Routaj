@@ -2,6 +2,9 @@ ldr      R0#150
 ldr R1#50
 ldr R2#-500
 ldr R3#50
+ldr R4#
+ldr R7#11100
+ldr R8#
 if: BEQ R0,R1
 	yolo
 	yolo
@@ -100,4 +103,11 @@ if: BLE R0,R1
 	yolo
 else: 
 	pas yolo
+	pas yolo
+
+if: LSLS R7,R8#3
+	yolo
+	yolo
+
+else:
 	pas yolo
