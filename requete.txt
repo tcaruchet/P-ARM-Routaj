@@ -1,10 +1,12 @@
 ldr      R0#150
-ldr R1#50
+ldr R1#250
 ldr R2#-500
-ldr R3#50
-ldr R4#
-ldr R7#11100
-ldr R8#
+ldr R3#250
+ldr R4#0
+ldr R7#7
+ldr R8#0
+ldr R9#550
+ldr R10#3
 if: BEQ R0,R1
 	yolo
 	yolo
@@ -48,7 +50,7 @@ if: BPL R0,R1
 else: 
 	pas yolo
 	pas yolo
-if: BVS R0,R1
+if: BVS R9,R1
 	yolo
 	yolo
 	yolo
@@ -106,6 +108,18 @@ else:
 	pas yolo
 
 if: LSLS R7,R8#3
+	yolo
+	yolo
+
+else:
+	pas yolo
+if: LSRS R7,R8#3
+	yolo
+	yolo
+
+else:
+	pas yolo
+if: ASRS R7,R8#3
 	yolo
 	yolo
 
