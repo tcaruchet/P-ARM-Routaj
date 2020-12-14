@@ -31,6 +31,17 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 		return mnemonique;
 	}
 	
+	ArrayList<Integer> loadStore(){ //mnemonique dédié aux 3 requetes Description
+		mnemonique = new ArrayList<>();
+		System.out.println();
+		mnemonique.add(1);
+		mnemonique.add(0);
+		mnemonique.add(0);
+		mnemonique.add(1);
+		//System.out.print("mnemonique = ");affich(mnemonique);
+		return mnemonique;
+	}
+	
 	void convBinaire(ArrayList<Integer> ab, int num, int bit) { //ajoute le bon nombre de zero en fonction du int entré pour donner une valeur binaire en 8 bits
 		//System.out.println("convBinaire");
 		//System.out.println("valeur entrée = "+ num);
@@ -151,11 +162,126 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 			for (int i = 0; i < spltEs.length; i++) {
 				switch(spltEs[i]) {
 					 
-					case "ldr" : System.out.println("ldr"); 		  //récupère les différentes affectation dans les registres, et les met dans les lists appropriées
+					/*case "ldr" : System.out.println("ldr"); 		  //récupère les différentes affectation dans les registres, et les met dans les lists appropriées
 								 String[] spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres sont séparés des valeurs par un #
 								 registres.add(spltHas[0]); 
 								 valeurs.add(spltHas[1]);
 								 break;
+					*/		
+				
+					// RT = Source register avec adresse = valeur RT +/- imm8
+					case "STR" : System.out.println("STR"); //store la valeur dans un registre
+								 String[] spltHas = spltEs[spltEs.length-1].split("#");
+								 String[] spltVir = spltHas[0].split(","); //On récupère RT et la valeur du Base register
+								 registres.add(spltVir[0]); //ajoute le registre
+								 valeurs.add(spltVir[1]); 	//valeur du registre
+								 int shift = Integer.parseInt(spltHas[1]); 	//imm 8 [-32 ; 32]
+								 valeurBinaire = initStoreLoad(assem, 0); //mnemonique + opcode
+								 int rt = Integer.parseInt(spltVir[1]);
+								 assem.fromLinesToBinary(valeurBinaire,rt , 3); //mnemonique + opcode + RT
+								 int imm8 = rt + shift;
+								 assem.fromLinesToBinary(valeurBinaire, imm8, 8);//mnemonique + opcode + RT + imm8
+								 affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
+								 aff(converterBinHex.hexaconverteur(valeurBinaire));
+								 System.out.println("\n");
+								 break;
+					//charge le contenu d'un registre depuis une adresse			 
+					case "LDR" : System.out.println("LDR"); //store la valeur dans un registre
+								 String[] spltHas2 = spltEs[spltEs.length-1].split("#");
+								 String[] spltVir2 = spltHas2[0].split(","); //On récupère RT et la valeur du Base register
+								 registres.add(spltVir2[0]); //ajoute le registre
+								 valeurs.add(spltVir2[1]); 	//valeur du registre
+								 int shift2 = Integer.parseInt(spltHas2[1]); 	//imm 8 [-32 ; 32]
+								 valeurBinaire = initStoreLoad(assem, 1); //mnemonique + opcode
+								 int rt2 = Integer.parseInt(spltVir2[1]);
+								 assem.fromLinesToBinary(valeurBinaire,rt2 , 3); //mnemonique + opcode + RT
+								 int imm82 = rt2 + shift2;
+								 assem.fromLinesToBinary(valeurBinaire, imm82, 8);//mnemonique + opcode + RT + imm8
+								 affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
+								 aff(converterBinHex.hexaconverteur(valeurBinaire));
+								 System.out.println("\n");
+								 break; 
+								 
+								 
+					case "LSLS" : System.out.println("LSLS");
+					  			  valeurBinaire = initDescr(assem, 0);
+					  			  spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
+					  			  rNrM = spltHas[0];
+					  			  imm = spltHas[1];
+					  			  registreCourSplit = spltHas[0].split(",");
+					  			  registre1 = registres.indexOf(registreCourSplit[0]);
+					  			  registre2 = registres.indexOf(registreCourSplit[1]);
+					  
+					  			  assem.fromLinesToBinary(constructionRegistre, Integer.parseInt(valeurs.get(registre1)), 3); //  R1 binaire = Rm (R0 = R8 = Rd)
+					  			  assem.fromLinesToBinary(constructionImm, Integer.parseInt(imm), 5); // imm binaire
+					  			  valeurBinaire.addAll(constructionImm); // mnemonique + id + imm5
+					  			  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
+					  			  constructionImm = shiftLeft(constructionRegistre, Integer.parseInt(imm), assem); //new registre
+					  			  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM
+					  			  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM + RD
+					  
+					  			  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
+					  			  aff(converterBinHex.hexaconverteur(valeurBinaire));
+					  			  System.out.println("\n");
+					  			  assem.setNegative(0);
+					  			  assem.setOverflow(0);
+					  			  assem.setCarry(0);
+					  			  assem.setNul(0);
+					  			  break;
+					  
+					  
+					case "LSRS" : System.out.println("LSRS");
+					  			  valeurBinaire = initDescr(assem, 1);
+					  			  spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
+					  			  rNrM = spltHas[0];
+					  			  imm = spltHas[1];
+					  			  registreCourSplit = spltHas[0].split(",");
+					  			  registre1 = registres.indexOf(registreCourSplit[0]);
+					  			  registre2 = registres.indexOf(registreCourSplit[1]);
+					  
+					  			  assem.fromLinesToBinary(constructionRegistre, Integer.parseInt(valeurs.get(registre1)), 3); //  R1 binaire = Rm (R0 = R8 = Rd)
+					  			  assem.fromLinesToBinary(constructionImm, Integer.parseInt(imm), 5); // imm binaire
+					  			  valeurBinaire.addAll(constructionImm); // mnemonique + id + imm5
+					  			  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
+					  			  constructionImm = shiftRight(constructionRegistre, Integer.parseInt(imm), assem); //new registre
+					  			  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM
+					  			  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM + RD
+					  
+					  			  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
+					  			  aff(converterBinHex.hexaconverteur(valeurBinaire));
+					  			  System.out.println("\n");
+					  			  assem.setNegative(0);
+					  			  assem.setOverflow(0);
+					  			  assem.setCarry(0);
+					  			  assem.setNul(0);
+					  			  break;
+			
+					case "ASRS" : System.out.println("ASRS");
+		  			  			  valeurBinaire = initDescr(assem, 2);
+		  			  			  spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
+		  			  			  rNrM = spltHas[0];
+		  			  			  imm = spltHas[1];
+		  			  			  registreCourSplit = spltHas[0].split(",");
+		  			  			  registre1 = registres.indexOf(registreCourSplit[0]);
+		  			  			  registre2 = registres.indexOf(registreCourSplit[1]);
+		  			  
+		  			  			  assem.fromLinesToBinary(constructionRegistre, Integer.parseInt(valeurs.get(registre1)), 3); //  R1 binaire = Rm (R0 = R8 = Rd)
+		  			  			  assem.fromLinesToBinary(constructionImm, Integer.parseInt(imm), 5); // imm binaire
+		  			  			  valeurBinaire.addAll(constructionImm); // mnemonique + id + imm5
+		  			  			  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
+		  			  			  constructionImm = shiftRightFlag(constructionRegistre, Integer.parseInt(imm), assem.getCarry(), assem); //new registre
+		  			  			  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM
+		  			  			  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM + RD
+		  
+		  			  			  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
+		  			  			  aff(converterBinHex.hexaconverteur(valeurBinaire));
+		  			  			  System.out.println("\n");
+		  			  			  assem.setNegative(0);
+		  			  			  assem.setOverflow(0);
+		  			  			  assem.setCarry(0);
+		  			  			  assem.setNul(0);
+		  			  			  break;
+						 
 								 
 					case "BEQ" : System.out.println("BEQ");									//BEQ = egal
 								 valeurBinaire = init(assem,0); 							//ajoute la valeur 0 apres les 4 zeros
@@ -500,86 +626,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								 assem.setCarry(0);
 								 assem.setNul(0);
 								break;
-						
-					case "LSLS" : System.out.println("LSLS");
-								  valeurBinaire = initDescr(assem, 0);
-								  spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
-								  rNrM = spltHas[0];
-								  imm = spltHas[1];
-								  registreCourSplit = spltHas[0].split(",");
-								  registre1 = registres.indexOf(registreCourSplit[0]);
-								  registre2 = registres.indexOf(registreCourSplit[1]);
-								  
-								  assem.fromLinesToBinary(constructionRegistre, Integer.parseInt(valeurs.get(registre1)), 3); //  R1 binaire = Rm (R0 = R8 = Rd)
-								  assem.fromLinesToBinary(constructionImm, Integer.parseInt(imm), 5); // imm binaire
-								  valeurBinaire.addAll(constructionImm); // mnemonique + id + imm5
-								  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
-								  constructionImm = shiftLeft(constructionRegistre, Integer.parseInt(imm), assem); //new registre
-								  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM
-								  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM + RD
-								  
-								  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
-								  aff(converterBinHex.hexaconverteur(valeurBinaire));
-								  System.out.println("\n");
-								  assem.setNegative(0);
-								  assem.setOverflow(0);
-								  assem.setCarry(0);
-								  assem.setNul(0);
-								  break;
-								  
-								  
-					case "LSRS" : System.out.println("LSRS");
-								  valeurBinaire = initDescr(assem, 1);
-								  spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
-								  rNrM = spltHas[0];
-								  imm = spltHas[1];
-								  registreCourSplit = spltHas[0].split(",");
-								  registre1 = registres.indexOf(registreCourSplit[0]);
-								  registre2 = registres.indexOf(registreCourSplit[1]);
-								  
-								  assem.fromLinesToBinary(constructionRegistre, Integer.parseInt(valeurs.get(registre1)), 3); //  R1 binaire = Rm (R0 = R8 = Rd)
-								  assem.fromLinesToBinary(constructionImm, Integer.parseInt(imm), 5); // imm binaire
-								  valeurBinaire.addAll(constructionImm); // mnemonique + id + imm5
-								  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
-								  constructionImm = shiftRight(constructionRegistre, Integer.parseInt(imm), assem); //new registre
-								  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM
-								  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM + RD
-								  
-								  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
-								  aff(converterBinHex.hexaconverteur(valeurBinaire));
-								  System.out.println("\n");
-								  assem.setNegative(0);
-								  assem.setOverflow(0);
-								  assem.setCarry(0);
-								  assem.setNul(0);
-								  break;
-						
-					case "ASRS" : System.out.println("ASRS");
-					  			  valeurBinaire = initDescr(assem, 2);
-					  			  spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
-					  			  rNrM = spltHas[0];
-					  			  imm = spltHas[1];
-					  			  registreCourSplit = spltHas[0].split(",");
-					  			  registre1 = registres.indexOf(registreCourSplit[0]);
-					  			  registre2 = registres.indexOf(registreCourSplit[1]);
-					  			  
-					  			  assem.fromLinesToBinary(constructionRegistre, Integer.parseInt(valeurs.get(registre1)), 3); //  R1 binaire = Rm (R0 = R8 = Rd)
-					  			  assem.fromLinesToBinary(constructionImm, Integer.parseInt(imm), 5); // imm binaire
-					  			  valeurBinaire.addAll(constructionImm); // mnemonique + id + imm5
-					  			  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
-					  			  constructionImm = shiftRightFlag(constructionRegistre, Integer.parseInt(imm), assem.getCarry(), assem); //new registre
-					  			  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM
-					  			  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM + RD
-					  
-					  			  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
-					  			  aff(converterBinHex.hexaconverteur(valeurBinaire));
-								  System.out.println("\n");
-					  			  assem.setNegative(0);
-					  			  assem.setOverflow(0);
-					  			  assem.setCarry(0);
-					  			  assem.setNul(0);
-					  			  break;
-						
+								
 					default : break;
 				}
 			}
@@ -662,13 +709,10 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 	private static ArrayList<Integer> init(Assembleur assem, int opcode) {
 		ArrayList<Integer> valeurBinaire;
 		valeurBinaire = new ArrayList<>();
-		//System.out.println("valeur du new arraylist = "+valeurBinaire);
 		valeurBinaire.addAll(assem.b()); 											//on ajoute les 1101 au debut de l'arraylist
-		//System.out.println("valeur B = "+valeurBinaire);
 		assem.convBinaire(valeurBinaire, opcode, 4);						    //on ajoute les 4 bits qui identifie l'opcode
 		String code = Integer.toBinaryString(opcode);
 		String[] spltCode = code.split("");
-		//System.out.println("code ==="+spltCode[0]);
 		for (String i : spltCode) {valeurBinaire.add(Integer.parseInt(i));}			//on ajoute a l'ArrayList un a un les valeurs de l'opcode
 		return valeurBinaire;
 	}
@@ -676,15 +720,22 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 	private static ArrayList<Integer> initDescr(Assembleur assem, int opcode) {
 		ArrayList<Integer> valeurBinaire;
 		valeurBinaire = new ArrayList<>();
-		//System.out.println("valeur du new arraylist = "+valeurBinaire);
 		valeurBinaire.addAll(assem.descr()); 										//on ajoute les 00 au debut de l'arraylist
-		//System.out.println("valeur B = "+valeurBinaire);
 		assem.convBinaire(valeurBinaire, opcode, 3);						    //on ajoute les 3 bits qui identifie l'opcode
 		String code = Integer.toBinaryString(opcode);
 		String[] spltCode = code.split("");
-		//System.out.println("code ==="+spltCode[0]);
 		for (String i : spltCode) {valeurBinaire.add(Integer.parseInt(i));}			//on ajoute a l'ArrayList un a un les valeurs de l'opcode
 		return valeurBinaire;
 	}
 	
+	private static ArrayList<Integer> initStoreLoad(Assembleur assem, int opcode) {
+		ArrayList<Integer> valeurBinaire;
+		valeurBinaire = new ArrayList<>();
+		valeurBinaire.addAll(assem.loadStore()); 									//on ajoute les 00 au debut de l'arraylist
+		assem.convBinaire(valeurBinaire, opcode, 1);						    	//on ajoute le 1 bits qui identifie l'opcode
+		String code = Integer.toBinaryString(opcode);
+		String[] spltCode = code.split("");
+		for (String i : spltCode) {valeurBinaire.add(Integer.parseInt(i));}			//on ajoute a l'ArrayList un a un les valeurs de l'opcode
+		return valeurBinaire;
+	}
 }
