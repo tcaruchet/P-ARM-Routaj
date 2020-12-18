@@ -31,7 +31,7 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 		return mnemonique;
 	}
 	
-	ArrayList<Integer> loadStore(){ //mnemonique dédié aux 3 requetes Description
+	ArrayList<Integer> loadStore(){ //mnemonique dédié aux 2 requetes Load/S
 		mnemonique = new ArrayList<>();
 		System.out.println();
 		mnemonique.add(1);
@@ -51,22 +51,46 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 		if (num < 16 & num >= 8) {for (int i = 0; i < bit-4; i++) {ab.add(0);}return;}
 		if (num < 32 & num >= 16) {for (int i = 0; i < bit-5; i++) {ab.add(0);}return;}
 		if (num < 64 & num >= 32) {for (int i = 0; i < bit-6; i++) {ab.add(0);}return;}
-		if (num < 128 & num >= 64) {for (int i = 0; i < bit-7; i++) {ab.add(0);}return;}
+		if (num <128 & num >= 64) {for (int i = 0; i < bit-7; i++) {ab.add(0);}return;}
+		if (num > 128) {return;}
 	}
 	
 	void fromLinesToBinary (ArrayList<Integer> ab, int lines, int bit) {			//Depuis le nb de lignes de l'étiquette, renvoie la liste avec les 8 bit de imm8 remplis
-		int binary = Integer.parseInt(Integer.toBinaryString(lines));	//convertit la ligne de l'etiquette en binaire
-		convBinaire(ab,lines,bit);										//ajoute les x 0 devant pour donner la valeur sur 8 bits, en fonction du nb de lignes en base 10
+		int binary;
+		setOverflow(isOverflow(lines, 0));
+		setCarry(isCarry(lines, 0));
+		if (lines < 0) { //dans le cas d'un nb négatif, on ajoute au bit le + a gauche
+			lines = -lines;
+			binary = Integer.parseInt(Integer.toBinaryString(lines));	//convertit la ligne de l'etiquette en binaire
+			convBinaire(ab,lines,bit);										//ajoute les x 0 devant pour donner la valeur sur x bits, en fonction du nb de lignes en base 10
+			for (int i = 0; i<ab.size();i++) {
+				//System.out.println("valeur ab avant set : "+ab.get(i));
+			}
+			ab.set((16-bit), 1); //on met le bit de signe à la valeur 8 car c'est le bit de signe de l'imm8
+		}else {
+			binary = Integer.parseInt(Integer.toBinaryString(lines));	//convertit la ligne de l'etiquette en binaire
+			convBinaire(ab,lines,bit);										//ajoute les x 0 devant pour donner la valeur sur x bits, en fonction du nb de lignes en base 10
+		}
 		String binaryS = String.valueOf(binary);
 		String[] binarySplt = binaryS.split("");
-		for (int i = 0; i < binarySplt.length; i++) {					//on split pour avoir une valeur de type [1,1,1] plutot que [111]
-			ab.add(Integer.parseInt(binarySplt[i]));					//ajoute la valeur binaire des lignes dans la liste
-		}								
+		ArrayList<String> binarySpltArr = new ArrayList<String>();
+		for (int i = 0; i < binarySplt.length; i++) {binarySpltArr.add(binarySplt[i]);}
+		
+		if (binarySpltArr.size() > 8 ) { 									//nb > 255 (2^8 - 1)												
+			while (binarySpltArr.size() > 8 ) {
+				binarySpltArr.remove(0);			//on va donc retiré tous les bits a droite jusqu'a avoir une valeur sur 8 bits
+			}
+		}
+		//System.out.println("pour = "+lines);
+		for (int i = 0; i < binarySpltArr.size(); i++) {					//on split pour avoir une valeur de type [1,1,1] plutot que [111]
+			ab.add(Integer.parseInt(binarySpltArr.get(i)));					//ajoute la valeur binaire des lignes dans la liste
+			//System.out.println("add : "+binarySpltArr.get(i));
+		}
 	}
 	
 	int isOverflow(int a, int b) {
 		int o = 1; 
-		if (a+b > -128 || a+b < 127) {
+		if ((a+b) > -128 && (a+b) < 127) {
 			o = 0;
 		}
 		return o;
@@ -175,28 +199,32 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 								 String[] spltVir = spltHas[0].split(","); //On récupère RT et la valeur du Base register
 								 registres.add(spltVir[0]); //ajoute le registre
 								 valeurs.add(spltVir[1]); 	//valeur du registre
+								 
 								 int shift = Integer.parseInt(spltHas[1]); 	//imm 8 [-32 ; 32]
 								 valeurBinaire = initStoreLoad(assem, 0); //mnemonique + opcode
 								 int rt = Integer.parseInt(spltVir[1]);
 								 assem.fromLinesToBinary(valeurBinaire,rt , 3); //mnemonique + opcode + RT
 								 int imm8 = rt + shift;
 								 assem.fromLinesToBinary(valeurBinaire, imm8, 8);//mnemonique + opcode + RT + imm8
+								 
 								 affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								 aff(converterBinHex.hexaconverteur(valeurBinaire));
 								 System.out.println("\n");
 								 break;
 					//charge le contenu d'un registre depuis une adresse			 
-					case "LDR" : System.out.println("LDR"); //store la valeur dans un registre
+					case "LDR" : System.out.println("LDR"); 
 								 String[] spltHas2 = spltEs[spltEs.length-1].split("#");
 								 String[] spltVir2 = spltHas2[0].split(","); //On récupère RT et la valeur du Base register
-								 registres.add(spltVir2[0]); //ajoute le registre
-								 valeurs.add(spltVir2[1]); 	//valeur du registre
+								 //registres.add(spltVir2[0]); //ajoute le registre
+								 //valeurs.add(spltVir2[1]); 	//valeur du registre
+								 
 								 int shift2 = Integer.parseInt(spltHas2[1]); 	//imm 8 [-32 ; 32]
 								 valeurBinaire = initStoreLoad(assem, 1); //mnemonique + opcode
 								 int rt2 = Integer.parseInt(spltVir2[1]);
 								 assem.fromLinesToBinary(valeurBinaire,rt2 , 3); //mnemonique + opcode + RT
-								 int imm82 = rt2 + shift2;
+								 int imm82 = rt2 + shift2; //imm8 = numero du registre + valeur du shift
 								 assem.fromLinesToBinary(valeurBinaire, imm82, 8);//mnemonique + opcode + RT + imm8
+								 
 								 affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 								 aff(converterBinHex.hexaconverteur(valeurBinaire));
 								 System.out.println("\n");
@@ -212,13 +240,14 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 					  			  registre1 = registres.indexOf(registreCourSplit[0]);
 					  			  registre2 = registres.indexOf(registreCourSplit[1]);
 					  
+					  			  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
 					  			  assem.fromLinesToBinary(constructionRegistre, Integer.parseInt(valeurs.get(registre1)), 3); //  R1 binaire = Rm (R0 = R8 = Rd)
 					  			  assem.fromLinesToBinary(constructionImm, Integer.parseInt(imm), 5); // imm binaire
 					  			  valeurBinaire.addAll(constructionImm); // mnemonique + id + imm5
 					  			  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
 					  			  constructionImm = shiftLeft(constructionRegistre, Integer.parseInt(imm), assem); //new registre
-					  			  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM
-					  			  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM + RD
+					  			  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM 
+		  			  			  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM + RD
 					  
 					  			  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 					  			  aff(converterBinHex.hexaconverteur(valeurBinaire));
@@ -239,13 +268,14 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 					  			  registre1 = registres.indexOf(registreCourSplit[0]);
 					  			  registre2 = registres.indexOf(registreCourSplit[1]);
 					  
+					  			  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
 					  			  assem.fromLinesToBinary(constructionRegistre, Integer.parseInt(valeurs.get(registre1)), 3); //  R1 binaire = Rm (R0 = R8 = Rd)
 					  			  assem.fromLinesToBinary(constructionImm, Integer.parseInt(imm), 5); // imm binaire
 					  			  valeurBinaire.addAll(constructionImm); // mnemonique + id + imm5
 					  			  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
 					  			  constructionImm = shiftRight(constructionRegistre, Integer.parseInt(imm), assem); //new registre
-					  			  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM
-					  			  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM + RD
+					  			  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM 
+		  			  			  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM + RD
 					  
 					  			  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 					  			  aff(converterBinHex.hexaconverteur(valeurBinaire));
@@ -261,17 +291,19 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 		  			  			  spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
 		  			  			  rNrM = spltHas[0];
 		  			  			  imm = spltHas[1];
-		  			  			  registreCourSplit = spltHas[0].split(",");
-		  			  			  registre1 = registres.indexOf(registreCourSplit[0]);
-		  			  			  registre2 = registres.indexOf(registreCourSplit[1]);
+		  			  			  registreCourSplit = spltHas[0].split(",");			//Dans l'exemple ASRS R5,R6#2
+		  			  			  registre1 = registres.indexOf(registreCourSplit[0]); //R5 = RD -> décale le contenu de ce registre
+		  			  			  registre2 = registres.indexOf(registreCourSplit[1]); //R6 = RM -> ecrit le resultat du decalage dans ce registre
 		  			  
-		  			  			  assem.fromLinesToBinary(constructionRegistre, Integer.parseInt(valeurs.get(registre1)), 3); //  R1 binaire = Rm (R0 = R8 = Rd)
+		  			  			  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
+		  			  			  assem.fromLinesToBinary(constructionRegistre, Integer.parseInt(valeurs.get(registre1)), 3); //  RD
 		  			  			  assem.fromLinesToBinary(constructionImm, Integer.parseInt(imm), 5); // imm binaire
 		  			  			  valeurBinaire.addAll(constructionImm); // mnemonique + id + imm5
 		  			  			  constructionImm.clear(); //on va le réutiliser pour récupérer la valeur du nouveau registre
-		  			  			  constructionImm = shiftRightFlag(constructionRegistre, Integer.parseInt(imm), assem.getCarry(), assem); //new registre
-		  			  			  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM
-		  			  			  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM + RD
+		  			  			  constructionImm = shiftRightFlag(constructionRegistre, Integer.parseInt(imm), assem.getCarry(), assem); //RM
+		  			  			  valeurBinaire.addAll(constructionImm); //mnemonique + id + imm5 + RM 
+		  			  			  valeurBinaire.addAll(constructionRegistre); //mnemonique + id + imm5 + RM + RD
+		  			  			  
 		  
 		  			  			  affich(valeurBinaire, assem.getCarry(), assem.getOverflow(), assem.getNegative(), assem.getNul());
 		  			  			  aff(converterBinHex.hexaconverteur(valeurBinaire));
@@ -671,39 +703,41 @@ public class Assembleur { //4 bits pour etiquette, 4 bits pour mnemonique, 8 bit
 		assem.fromLinesToBinary(valeurBinaire, ifss,8);
 	}
 	
-	private static ArrayList<Integer> shiftLeft(ArrayList<Integer> liste,int imm5, Assembleur assem){ //R1, imm
+	private static ArrayList<Integer> shiftRight(ArrayList<Integer> liste,int imm5, Assembleur assem){ //R1, imm //0 ajouté a gauche //liste = RD
 		assem.setOverflow(0); //overflow tjr egal a 0 lors de decalage a gauche
 		ArrayList<Integer> tempo = new ArrayList<Integer>();
-		for (int i = 0 ; i < imm5; i++) {tempo.add(0);} //on ajoute les 0 au debut																			//RM = 111
-		tempo.addAll(liste);																																//RD = 000111
+		for (int i = 0 ; i < imm5; i++) {tempo.add(0);} //on ajoute les 0 au debut																			//RD = 	  111
+		tempo.addAll(liste);																																//RM = 111000
 		assem.setCarry(tempo.get(3)); //la retenue est égale au dernier bit sortant
-		for (int j = tempo.size()-1; j > 2; j--) {tempo.remove(j);} //on retire le surplus, a partir de 2 car c'est l'indice nb 3, or c'est codé sur 3 bits	//RD = 000
+		for (int j = tempo.size()-1; j > 2; j--) {tempo.remove(j);} //on retire le surplus, a partir de 2 car c'est l'indice nb 3, or c'est codé sur 3 bits	//RM =    000
 		if (tempo.contains(1)){assem.setNul(0);}
 		else {assem.setNul(1);}
-		return tempo;
+		return tempo;																												  //tempo = RM
 	}
 	
-	private static ArrayList<Integer> shiftRight(ArrayList<Integer> liste,int imm5, Assembleur assem){
+	private static ArrayList<Integer> shiftLeft(ArrayList<Integer> liste,int imm5, Assembleur assem){ //0 ajouté a droite //liste = RD
 		assem.setOverflow(0); //overflow tjr egal a 0 lors de decalage a droite
 		ArrayList<Integer> tempo = new ArrayList<Integer>();
 		ArrayList<Integer> tempo2 = new ArrayList<Integer>();
-		tempo.addAll(liste);																//RM = 	  111
-		for (int i = 0; i < imm5; i++) {tempo.add(0);} //on ajoute les 0 a la fin			//RD = 111000
+		tempo.addAll(liste);																//RD = 111
+		for (int i = 0; i < imm5; i++) {tempo.add(0);} //on ajoute les 0 a la fin			//RM = 000111
 		assem.setCarry(tempo.get(tempo.size() - 4)); 	//la retenue est égale au dernier bit sortant
-		for (int j = tempo.size() - 3; j < tempo.size(); j++) {tempo2.add(tempo.get(j));}	//RD = 	  000
+		for (int j = tempo.size() - 3; j < tempo.size(); j++) {tempo2.add(tempo.get(j));}	//RM = 000
 		if (tempo2.contains(1)){assem.setNul(0);}
 		else {assem.setNul(1);}
-		return tempo2;
+		return tempo2;																										//tempo = RM
 	}
 	
-	private static ArrayList<Integer> shiftRightFlag(ArrayList<Integer> liste,int imm5, int carry, Assembleur assem){
+	private static ArrayList<Integer> shiftRightFlag(ArrayList<Integer> liste,int imm5, int carry, Assembleur assem){ //liste = RD
 		ArrayList<Integer> tempo = new ArrayList<Integer>();
 		tempo = shiftRight(liste,imm5,assem);
-		tempo.remove(2);
-		tempo.add(assem.getCarry()); //le dernier bit est la valeur de la retenue
+		//tempo.remove(2);
+		//Bit de signe maintenu
+		//je pars du principe que réinséré = de 001 à 101
+		tempo.set(0, liste.get(0));
 		if (tempo.contains(1)){assem.setNul(0);}
 		else {assem.setNul(1);}
-		return tempo;
+		return tempo;																								   //tempo = RM
 	}
 
 	private static ArrayList<Integer> init(Assembleur assem, int opcode) {
