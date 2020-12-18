@@ -1,8 +1,8 @@
 package Assembleur;
 
 public enum DataProcessing {
-	AND("010000","0000"),
-	OR("010000","0001"),
+	ANDS("010000","0000"),
+	EORS("010000","0001"),
 	LSLS("010000","0010"),
 	LSRS("010000","0011"),
 	ASRS("010000","0100"),

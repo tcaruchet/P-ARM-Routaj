@@ -74,9 +74,8 @@ public class AssembleurV2 {
 		ArrayList<Integer> ifs = new ArrayList<Integer>();
 		ArrayList<Integer> elses = new ArrayList<Integer>();
 		int lignes = 0;
-		ArrayList<String> registres = new ArrayList<String>();
-		ArrayList<String> registresCourant = new ArrayList<String>();
-		ArrayList<String> valeurs = new ArrayList<String>();
+		//ArrayList<String> registres = new ArrayList<String>();
+		//ArrayList<String> valeurs = new ArrayList<String>();
 		
 		while ((line = in.readLine()) != null){
 			lignes++;
@@ -114,7 +113,7 @@ public class AssembleurV2 {
 			boolean breaker = false;
 		
 			for (int i = 0; i < spltEs.length; i++) {
-				switch(spltEs[i]) { //chaque mots d'une ligne
+				switch(spltEs[i]) { //chaque mots, séparé d'un espace, d'une ligne
 				
 					case "LDR" : 	System.out.println("LDR");
 									spltHas = spltEs[spltEs.length-1].split("#");
@@ -151,8 +150,8 @@ public class AssembleurV2 {
 									spltHas = spltEs[spltEs.length-1].split("#");
 									spltVir = spltHas[0].split(","); //On récupère RT et la valeur du registre de base
 									shift = Integer.parseInt(spltHas[1]); //On récupère la valeur de shift [valeur suivant le #]
-									registres.add(spltVir[0]); 	//stocke le registre
-									valeurs.add(spltVir[1]); 	//stocke le numéro du registre [ici son numéro = sa valeur]
+									//registres.add(spltVir[0]); 	//stocke le registre
+									//valeurs.add(spltVir[1]); 	//stocke le numéro du registre [ici son numéro = sa valeur]
 									
 									mnemoniqueBinaire = assem.fromStringToArray(LoadStore.STR.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(LoadStore.STR.getOpcode());
@@ -181,15 +180,51 @@ public class AssembleurV2 {
 									break;
 									
 					case "LSLS" :	System.out.println("LSLS");
-									spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
-									registreCourSplit = spltHas[0].split(","); //les deux registres sollicités
-									registre1 = Integer.parseInt(valeurs.get(registres.indexOf(registreCourSplit[0]))); //récupère l'indice du registre x, de cet indice en déduis sa valeur
-									registre2 = Integer.parseInt(valeurs.get(registres.indexOf(registreCourSplit[1])));
-			
-									mnemoniqueBinaire = assem.fromStringToArray(Description.LSLS.getMnemonique());
-									opcodeBinaire = assem.fromStringToArray(Description.LSLS.getOpcode());
-									imm8 = Integer.parseInt(spltHas[1]); //la valeur du décalage [imm5]
-									assem.fromIntToBinary(immBinaire, imm8, 5); //valeur du decalage en binaire
+									for (String str : spltEs[1].split("")) {
+										if (str.equals("#")) {  //permet de différencier le type d'ADDS
+											breaker = true;
+							
+											//cas LSLS Immediate
+											spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
+											registreCourSplit = spltHas[0].split(","); //les deux registres sollicités
+											registre1 = Integer.parseInt(registreCourSplit[0]); //récupère l'indice du registre x, de cet indice en déduis sa valeur
+											registre2 = Integer.parseInt(registreCourSplit[1]);
+					
+											mnemoniqueBinaire = assem.fromStringToArray(Description.LSLS.getMnemonique());
+											opcodeBinaire = assem.fromStringToArray(Description.LSLS.getOpcode());
+											imm8 = Integer.parseInt(spltHas[1]); //la valeur du décalage [imm5]
+											assem.fromIntToBinary(immBinaire, imm8, 5); //valeur du decalage en binaire
+											assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+											assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RD
+											
+											//on ajoute tout pour constituer notre mot
+											motBinaire.addAll(mnemoniqueBinaire);
+											motBinaire.addAll(opcodeBinaire);
+											motBinaire.addAll(immBinaire);
+											motBinaire.addAll(registreBinaire);
+											
+											//affichage
+											System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+											System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+											System.out.print("RM et RD = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+											System.out.print("imm8 = ");assem.affichBin(immBinaire);
+											System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+											System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+											System.out.println("\n");
+											
+											motBinaire.clear();
+											break;
+										}
+									}
+									if (breaker == true){break;}
+									
+									//cas LSLS Register
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres et imm5 sont séparés des valeurs par un #
+									registre1 = Integer.parseInt(spltHas[0]); //récupère l'indice du registre x, de cet indice en déduis sa valeur
+									registre2 = Integer.parseInt(spltHas[1]);
+									
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.LSLS.getMnemonique()); //RD
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.LSLS.getOpcode()); //RM
 									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
 									assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RD
 									
@@ -203,74 +238,148 @@ public class AssembleurV2 {
 									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
 									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
 									System.out.print("RM et RD = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
-									System.out.print("imm8 = ");assem.affichBin(immBinaire);
 									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 									
 									motBinaire.clear();
+									breaker = false;
 									break;
+
+									
 									
 					case "LSRS" : 	System.out.println("LSRS");
-									spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
-									registreCourSplit = spltHas[0].split(","); //les deux registres sollicités
-									registre1 = Integer.parseInt(valeurs.get(registres.indexOf(registreCourSplit[0]))); //récupère l'indice du registre x, de cet indice en déduis sa valeur
-									registre2 = Integer.parseInt(valeurs.get(registres.indexOf(registreCourSplit[1])));
-									
-									mnemoniqueBinaire = assem.fromStringToArray(Description.LSRS.getMnemonique());
-									opcodeBinaire = assem.fromStringToArray(Description.LSRS.getOpcode());
-									imm8 = Integer.parseInt(spltHas[1]); //la valeur du décalage [imm5]
-									assem.fromIntToBinary(immBinaire, imm8, 5); //valeur du decalage en binaire
+									for (String str : spltEs[1].split("")) {
+										if (str.equals("#")) {  //permet de différencier le type d'ADDS
+											breaker = true;
+			
+											//cas LSRS Immediate
+											spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
+											registreCourSplit = spltHas[0].split(","); //les deux registres sollicités
+											registre1 = Integer.parseInt(registreCourSplit[0]); //récupère l'indice du registre x, de cet indice en déduis sa valeur
+											registre2 = Integer.parseInt(registreCourSplit[1]);
+	
+											mnemoniqueBinaire = assem.fromStringToArray(Description.LSRS.getMnemonique());
+											opcodeBinaire = assem.fromStringToArray(Description.LSRS.getOpcode());
+											imm8 = Integer.parseInt(spltHas[1]); //la valeur du décalage [imm5]
+											assem.fromIntToBinary(immBinaire, imm8, 5); //valeur du decalage en binaire
+											assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+											assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RD
+								
+											//on ajoute tout pour constituer notre mot
+											motBinaire.addAll(mnemoniqueBinaire);
+											motBinaire.addAll(opcodeBinaire);
+											motBinaire.addAll(immBinaire);
+											motBinaire.addAll(registreBinaire);
+							
+											//affichage
+											System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+											System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+											System.out.print("RM et RD = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+											System.out.print("imm8 = ");assem.affichBin(immBinaire);
+											System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+											System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+											System.out.println("\n");
+							
+											motBinaire.clear();
+											break;
+										}
+									}
+									if (breaker == true){break;}
+					
+									//cas LSRS Register
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres et imm5 sont séparés des valeurs par un #
+									registre1 = Integer.parseInt(spltHas[0]); //récupère l'indice du registre x, de cet indice en déduis sa valeur
+									registre2 = Integer.parseInt(spltHas[1]);
+					
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.LSRS.getMnemonique()); //RD
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.LSRS.getOpcode()); //RM
 									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
 									assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RD
-									
+				
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
 									motBinaire.addAll(opcodeBinaire);
 									motBinaire.addAll(immBinaire);
 									motBinaire.addAll(registreBinaire);
-									
+					
 									//affichage
 									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
 									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
 									System.out.print("RM et RD = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
-									System.out.print("imm8 = ");assem.affichBin(immBinaire);
 									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
-									
+					
 									motBinaire.clear();
+									breaker = false;
 									break;
 									
 					case "ASRS" :	System.out.println("ASRS");
-									spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
-									registreCourSplit = spltHas[0].split(","); //les deux registres sollicités
-									registre1 = Integer.parseInt(valeurs.get(registres.indexOf(registreCourSplit[0]))); //récupère l'indice du registre x, de cet indice en déduis sa valeur
-									registre2 = Integer.parseInt(valeurs.get(registres.indexOf(registreCourSplit[1])));
+									for (String str : spltEs[1].split("")) {
+										if (str.equals("#")) {  //permet de différencier le type d'ADDS
+											breaker = true;
 
-									mnemoniqueBinaire = assem.fromStringToArray(Description.ASRS.getMnemonique());
-									opcodeBinaire = assem.fromStringToArray(Description.ASRS.getOpcode());
-									imm8 = Integer.parseInt(spltHas[1]); //la valeur du décalage [imm5]
-									assem.fromIntToBinary(immBinaire, imm8, 5); //valeur du decalage en binaire
+											//cas ASRS Immediate
+											spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
+											registreCourSplit = spltHas[0].split(","); //les deux registres sollicités
+											registre1 = Integer.parseInt(registreCourSplit[0]); //récupère l'indice du registre x, de cet indice en déduis sa valeur
+											registre2 = Integer.parseInt(registreCourSplit[1]);
+
+											mnemoniqueBinaire = assem.fromStringToArray(Description.ASRS.getMnemonique());
+											opcodeBinaire = assem.fromStringToArray(Description.ASRS.getOpcode());
+											imm8 = Integer.parseInt(spltHas[1]); //la valeur du décalage [imm5]
+											assem.fromIntToBinary(immBinaire, imm8, 5); //valeur du decalage en binaire
+											assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+											assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RD
+				
+											//on ajoute tout pour constituer notre mot
+											motBinaire.addAll(mnemoniqueBinaire);
+											motBinaire.addAll(opcodeBinaire);
+											motBinaire.addAll(immBinaire);
+											motBinaire.addAll(registreBinaire);
+			
+											//affichage
+											System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+											System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+											System.out.print("RM et RD = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+											System.out.print("imm8 = ");assem.affichBin(immBinaire);
+											System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+											System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+											System.out.println("\n");
+			
+											motBinaire.clear();
+											break;
+										}
+									}
+									if (breaker == true){break;}
+	
+									//cas ASRS Register
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres et imm5 sont séparés des valeurs par un #
+									registre1 = Integer.parseInt(spltHas[0]); //récupère l'indice du registre x, de cet indice en déduis sa valeur
+									registre2 = Integer.parseInt(spltHas[1]);
+	
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.ASRS.getMnemonique()); //RD
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.ASRS.getOpcode()); //RM
 									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
 									assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RD
-									
+
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
 									motBinaire.addAll(opcodeBinaire);
 									motBinaire.addAll(immBinaire);
 									motBinaire.addAll(registreBinaire);
-									
+	
 									//affichage
 									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
 									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
 									System.out.print("RM et RD = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
-									System.out.print("imm8 = ");assem.affichBin(immBinaire);
 									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
-									
+	
 									motBinaire.clear();
+									breaker = false;
 									break;
 									
 					case "ADDS" :	System.out.println("ADDS"); // on ne sait pas encore si c'est add register ou add immediate
@@ -281,8 +390,8 @@ public class AssembleurV2 {
 											//cas ADDS Immediate
 											spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
 											registreCourSplit = spltHas[0].split(","); //les deux registres sollicités
-											registre1 = Integer.parseInt(valeurs.get(registres.indexOf(registreCourSplit[0]))); //récupère l'indice du registre x, de cet indice en déduis sa valeur
-											registre2 = Integer.parseInt(valeurs.get(registres.indexOf(registreCourSplit[1])));
+											registre1 = Integer.parseInt(registreCourSplit[0]); //récupère l'indice du registre x, de cet indice en déduis sa valeur
+											registre2 = Integer.parseInt(registreCourSplit[1]);
 											
 											mnemoniqueBinaire = assem.fromStringToArray(ShAdSuMo.ADDI.getMnemonique());
 											opcodeBinaire = assem.fromStringToArray(ShAdSuMo.ADDI.getOpcode());
@@ -350,8 +459,8 @@ public class AssembleurV2 {
 											//cas SUBS Immediate
 											spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
 											registreCourSplit = spltHas[0].split(","); //les deux registres sollicités
-											registre1 = Integer.parseInt(valeurs.get(registres.indexOf(registreCourSplit[0]))); //récupère l'indice du registre x, de cet indice en déduis sa valeur
-											registre2 = Integer.parseInt(valeurs.get(registres.indexOf(registreCourSplit[1])));
+											registre1 = Integer.parseInt(registreCourSplit[0]); //récupère l'indice du registre x, de cet indice en déduis sa valeur
+											registre2 = Integer.parseInt(registreCourSplit[1]);
 											
 											mnemoniqueBinaire = assem.fromStringToArray(ShAdSuMo.SUBI.getMnemonique());
 											opcodeBinaire = assem.fromStringToArray(ShAdSuMo.SUBI.getOpcode());
@@ -437,7 +546,369 @@ public class AssembleurV2 {
 									
 									motBinaire.clear();
 									break;
+									
+					case "ANDS" : 	System.out.println("ANDS");
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres sont séparés par des ','
+									
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.ANDS.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.ANDS.getOpcode());
+									registre1 = Integer.parseInt(spltHas[0]); //RD
+									registre2 = Integer.parseInt(spltHas[1]); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									motBinaire.addAll(registreBinaire);
+									
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("registre = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+									
+									motBinaire.clear();
+									break;
+									
+					case "EORS" : 	System.out.println("EORS");
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres sont séparés par des ','
+
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.EORS.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.EORS.getOpcode());
+									registre1 = Integer.parseInt(spltHas[0]); //RD
+									registre2 = Integer.parseInt(spltHas[1]); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									motBinaire.addAll(registreBinaire);
+									
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("registre = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+									
+									motBinaire.clear();
+									break;
+									
+					case "ADCS" : 	System.out.println("ADCS");
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres sont séparés par des ','
+
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.ADCS.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.ADCS.getOpcode());
+									registre1 = Integer.parseInt(spltHas[0]); //RD
+									registre2 = Integer.parseInt(spltHas[1]); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
 					
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									motBinaire.addAll(registreBinaire);
+					
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("registre = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+					
+									motBinaire.clear();
+									break;
+					
+					case "RORS" : 	System.out.println("RORS");
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres sont séparés par des ','
+
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.RORS.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.RORS.getOpcode());
+									registre1 = Integer.parseInt(spltHas[0]); //RD
+									registre2 = Integer.parseInt(spltHas[1]); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+	
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									motBinaire.addAll(registreBinaire);
+	
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("registre = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+	
+									motBinaire.clear();
+									break;
+									
+					case "TST" : 	System.out.println("TST");
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres sont séparés par des ','
+
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.TST.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.TST.getOpcode());
+									registre1 = Integer.parseInt(spltHas[0]); //RD
+									registre2 = Integer.parseInt(spltHas[1]); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									motBinaire.addAll(registreBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("registre = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+									
+					case "RSBS" :	System.out.println("RSBS");
+									//cas LSRS Immediate
+									spltHas = spltEs[spltEs.length-1].split("#"); //on sait que les registres et imm5 sont séparés des valeurs par un #
+									registreCourSplit = spltHas[0].split(","); //les deux registres sollicités
+									registre1 = Integer.parseInt(registreCourSplit[0]); //récupère l'indice du registre x, de cet indice en déduis sa valeur
+									registre2 = Integer.parseInt(registreCourSplit[1]);
+
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.RSBS.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.RSBS.getOpcode());
+									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RD
+		
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+									motBinaire.addAll(registreBinaire);
+	
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("RM et RD = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+	
+									motBinaire.clear();
+									break;
+									
+					case "CMP" : 	System.out.println("CMP");
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres sont séparés par des ','
+
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.CMP.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.CMP.getOpcode());
+									registre1 = Integer.parseInt(spltHas[0]); //RD
+									registre2 = Integer.parseInt(spltHas[1]); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									motBinaire.addAll(registreBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("registre = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+									
+					case "CMN" : 	System.out.println("CMN");
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres sont séparés par des ','
+
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.CMN.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.CMN.getOpcode());
+									registre1 = Integer.parseInt(spltHas[0]); //RD
+									registre2 = Integer.parseInt(spltHas[1]); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									motBinaire.addAll(registreBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("registre = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+									
+					case "ORRS" : 	System.out.println("ORRS");
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres sont séparés par des ','
+
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.ORRS.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.ORRS.getOpcode());
+									registre1 = Integer.parseInt(spltHas[0]); //RD
+									registre2 = Integer.parseInt(spltHas[1]); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									motBinaire.addAll(registreBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("registre = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+									
+					case "MULS" : 	System.out.println("MULS");
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres sont séparés par des ','
+
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.MULS.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.MULS.getOpcode());
+									registre1 = Integer.parseInt(spltHas[0]); //RD
+									registre2 = Integer.parseInt(spltHas[1]); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									motBinaire.addAll(registreBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("registre = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+									
+					case "BICS" : 	System.out.println("BICS");
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres sont séparés par des ','
+
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.BICS.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.BICS.getOpcode());
+									registre1 = Integer.parseInt(spltHas[0]); //RD
+									registre2 = Integer.parseInt(spltHas[1]); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									motBinaire.addAll(registreBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("registre = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+					
+					case "MVNS" : 	System.out.println("MVNS");
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres sont séparés par des ','
+
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.MVNS.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.MVNS.getOpcode());
+									registre1 = Integer.parseInt(spltHas[0]); //RD
+									registre2 = Integer.parseInt(spltHas[1]); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									motBinaire.addAll(registreBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("registre = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+									
+									motBinaire.clear();
+									break;
+									
+					case "ADD" : 	System.out.println("ADD");
+									spltHas = spltEs[spltEs.length-1].split("#");
+					
+									mnemoniqueBinaire = assem.fromStringToArray(Miscellaneous.ADD.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(Miscellaneous.ADD.getOpcode());
+									imm8 = Integer.parseInt(spltHas[1]); //On récupère la valeur de shift [valeur suivant le #]
+									assem.fromIntToBinary(immBinaire, imm8, 7); //la valeur binaire de l'adresse imm8
+					
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+					
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("imm8 = ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+					
+									motBinaire.clear();
+									break;
+									
+					case "SUB"  : 	System.out.println("SUB");
+									spltHas = spltEs[spltEs.length-1].split("#");
+					
+									mnemoniqueBinaire = assem.fromStringToArray(Miscellaneous.SUB.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(Miscellaneous.SUB.getOpcode());
+									imm8 = Integer.parseInt(spltHas[1]); //On récupère la valeur de shift [valeur suivant le #]
+									assem.fromIntToBinary(immBinaire, imm8, 7); //la valeur binaire de l'adresse imm8
+	
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+	
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("imm8 = ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+	
+									motBinaire.clear();
+									break;
 				}
 			}
 																				
