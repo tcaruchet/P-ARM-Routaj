@@ -1,22 +1,28 @@
 LDR 0,0#110
-LDR 1,1#-131
+LDR 1,1#-100
 STR 0,0#8
-STR 1,1#-131
-
-CMP 0,1
-BEQ then
-if: 
-
-
-then: 
-
-
-end
+STR 1,1#-100
 
 MOVS 0#0
 
 loop: 
-	CMP 0,1
-	BEQ end
-	add 0#1
-	B loop
+CMP 0,1
+BEQ end
+ADDS 0,0#1
+B loop
+
+ADDS 0,0#100
+CMP 0,1
+
+BGE if
+BLT else
+
+if: 
+ADDS 1,1#200
+B end
+
+else: 
+ADDS 0,0#100
+B end 
+
+end

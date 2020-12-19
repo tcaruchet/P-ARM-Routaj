@@ -7,6 +7,12 @@ import java.util.ArrayList;
 
 public class AssembleurV2 {
 	
+	static int ifLines = 0;
+	static int elseLines = 0;
+	static int thenLines = 0;
+	static int endLines = 0;
+	static int loopLines = 0;
+	
 	public ArrayList<Integer> fromStringToArray(String valeur) {
 		String[] spliter = valeur.split(""); //pour passer de 111 à 1,1,1
 		ArrayList<Integer> nombreBinaire = new ArrayList<Integer>();
@@ -64,38 +70,78 @@ public class AssembleurV2 {
 		for (String p : valeurBinaire) {System.out.print(p);}
 	}
 
+	public static int conditionalSwitch(ArrayList<Integer> ifArray, ArrayList<Integer> elseArray,ArrayList<Integer> thenArray, ArrayList<Integer> endArray, ArrayList<Integer> loopArray,String[] spltHas) {
+		int imm8 = 0;
+		switch(spltHas[0]) {
+		case "if" :		imm8 = ifArray.get(ifLines);
+						ifLines++;
+						//elseLines++; //on incrémente les deux car si on choisit un if, cad qu'on ne choisit pas son else
+						break;
+					
+		case "else"	:	imm8 = elseArray.get(elseLines);
+						elseLines++;
+						//ifLines++;
+						break;
+						
+		case "then" : 	imm8 = thenArray.get(thenLines);
+						thenLines++;
+						break;
+		 				
+		case "end" : 	imm8 = endArray.get(endLines);
+						//endLines++; on n'a qu'un seul end
+						break;
+		  				
+		case "loop" : 	imm8 = loopArray.get(loopLines);
+						loopLines++;
+						break;
+		}
+		return imm8;
+	}
+	
 	public static void main(String[] args) throws IOException{
 		AssembleurV2 assem = new AssembleurV2();
 		ConverterBinHex converterBinHex = new ConverterBinHex();
 		
 		//parcour le fichier pour récupérer les conditions (if/else)
-		BufferedReader in = new BufferedReader(new FileReader("res/requete.txt"));
+		BufferedReader in = new BufferedReader(new FileReader("res/requeteBranch"));
 		String line;
-		ArrayList<Integer> ifs = new ArrayList<Integer>();
-		ArrayList<Integer> elses = new ArrayList<Integer>();
+		ArrayList<Integer> ifArray = new ArrayList<Integer>();
+		ArrayList<Integer> elseArray = new ArrayList<Integer>();
+		ArrayList<Integer> thenArray = new ArrayList<Integer>();
+		ArrayList<Integer> endArray = new ArrayList<Integer>();
+		ArrayList<Integer> loopArray = new ArrayList<Integer>();
 		int lignes = 0;
-		//ArrayList<String> registres = new ArrayList<String>();
-		//ArrayList<String> valeurs = new ArrayList<String>();
 		
-		while ((line = in.readLine()) != null){
+		while ((line = in.readLine()) != null){ //on parcours une premier fois le fichier pour repérer les étiquettes
 			lignes++;
 			String[] splt = line.split(":");
-			
-			if (splt[0].equals("if")) {
-				System.out.println("if");
-				ifs.add(lignes);
-			}
-			if (splt[0].equals("else")) {
-				System.out.println("else");
-				elses.add(lignes);
+			switch(splt[0]) {
+				case "if" :		System.out.println("if");
+								ifArray.add(lignes);
+								break;
+							
+				case "else"	:	System.out.println("else");
+								elseArray.add(lignes);
+								break;
+								
+				case "then" : 	System.out.println("then");
+				 				thenArray.add(lignes);
+				 				break;
+				 				
+				case "end" : 	System.out.println("end");
+				  				endArray.add(lignes);
+				  				break;
+				  				
+				case "loop" : 	System.out.println("loop");
+								loopArray.add(lignes);
+								break;
 			}
 		}
 		in.close();
 		
-		//parcour une seconde fois le fichier pour récupérer les requêtes
-		BufferedReader in2 = new BufferedReader(new FileReader("res/requete.txt"));
+		//parcours une seconde fois le fichier pour récupérer les requêtes
+		BufferedReader in2 = new BufferedReader(new FileReader("res/requeteBranch"));
 		String line2;
-		int j = 0; 					//cette valeur représente l'indice unique de chaque etiquettes, on va l'incrementer a chaque fois qu'on en traite une (sembable a un .remove dans la liste)
 		while ((line2 = in2.readLine()) != null){
 			String[] spltEs = line2.split(" ");
 			String[] registreCourSplit;
@@ -113,6 +159,7 @@ public class AssembleurV2 {
 			boolean breaker = false;
 		
 			for (int i = 0; i < spltEs.length; i++) {
+				//System.out.println("valeur j = "+j);
 				switch(spltEs[i]) { //chaque mots, séparé d'un espace, d'une ligne
 				
 					case "LDR" : 	System.out.println("LDR");
@@ -150,8 +197,6 @@ public class AssembleurV2 {
 									spltHas = spltEs[spltEs.length-1].split("#");
 									spltVir = spltHas[0].split(","); //On récupère RT et la valeur du registre de base
 									shift = Integer.parseInt(spltHas[1]); //On récupère la valeur de shift [valeur suivant le #]
-									//registres.add(spltVir[0]); 	//stocke le registre
-									//valeurs.add(spltVir[1]); 	//stocke le numéro du registre [ici son numéro = sa valeur]
 									
 									mnemoniqueBinaire = assem.fromStringToArray(LoadStore.STR.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(LoadStore.STR.getOpcode());
@@ -909,12 +954,352 @@ public class AssembleurV2 {
 	
 									motBinaire.clear();
 									break;
+									
+					case "B" : 		System.out.println("B"); //toujours vrai, utilisé pour relancer une boucle
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.B.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.B.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8);
+								
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+								
+					case "BEQ" : 	System.out.println("BEQ"); //toujours vrai, utilisé pour relancer une boucle
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BEQ.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BEQ.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8);
+					
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+								
+					case "BNE" : 	System.out.println("BNE"); //toujours vrai, utilisé pour relancer une boucle
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BNE.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BNE.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8);
+		
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+									
+					case "BCS" : 	System.out.println("BCS"); //toujours vrai, utilisé pour relancer une boucle
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BCS.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BCS.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8);
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+									
+					case "BCC" : 	System.out.println("BCC"); //toujours vrai, utilisé pour relancer une boucle
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BCC.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BCC.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8);
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+									
+					case "BMI" : 	System.out.println("BMI"); //toujours vrai, utilisé pour relancer une boucle
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BMI.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BMI.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8);
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+									
+					case "BPL" : 	System.out.println("BPL"); //toujours vrai, utilisé pour relancer une boucle
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BPL.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BPL.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8);
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+									
+					case "BVS" : 	System.out.println("BVS"); //toujours vrai, utilisé pour relancer une boucle
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BVS.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BVS.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8);
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+									
+					case "BHI" : 	System.out.println("BHI"); //toujours vrai, utilisé pour relancer une boucle
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BHI.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BHI.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8);
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+									
+									motBinaire.clear();
+									break;
+									
+					case "BLS" : 	System.out.println("BLS"); //toujours vrai, utilisé pour relancer une boucle
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BLS.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BLS.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8);
+									
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+					
+									motBinaire.clear();
+									break;
+									
+					case "BGE" : 	System.out.println("BGE"); //toujours vrai, utilisé pour relancer une boucle
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BGE.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BGE.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8);
+					
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+	
+									motBinaire.clear();
+									break;
+									
+					case "BLT" : 	System.out.println("BLT"); //toujours vrai, utilisé pour relancer une boucle
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BLT.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BLT.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8);
+	
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+									
+					case "BGT" : 	System.out.println("BGT"); //toujours vrai, utilisé pour relancer une boucle
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BGT.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BGT.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8);
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+									
+					case "BLE" : 	System.out.println("BLE"); //toujours vrai, utilisé pour relancer une boucle
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BLE.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BLE.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8);
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									motBinaire.clear();
+									break;
+
+
 				}
 			}
 																				
 		}
 		in2.close();
 	}
+
+	
 	
 }
 
