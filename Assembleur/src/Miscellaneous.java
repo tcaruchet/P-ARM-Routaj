@@ -1,15 +1,13 @@
-package Assembleur;
 
-import java.util.ArrayList;
 
-public enum LoadStore {
-	STR("100","10"),
-	LDR("100","11");
+public enum Miscellaneous {
+	ADD("1011","00000"),
+	SUB("1011","00001");
 	
 	String mnemonique;
 	String opcode;
 	
-	LoadStore(String mnemonique, String opcode){
+	Miscellaneous(String mnemonique, String opcode){
 		this.mnemonique = mnemonique;
 		this.opcode = opcode;
 	}
@@ -21,4 +19,5 @@ public enum LoadStore {
 	public String getOpcode() {
 		return this.opcode;
 	}
+
 }

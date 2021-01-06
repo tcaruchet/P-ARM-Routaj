@@ -1,8 +1,10 @@
-package Assembleur;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class AssembleurV2 {
@@ -98,6 +100,14 @@ public class AssembleurV2 {
 		return imm8;
 	}
 	
+	public static void ecriture(ConverterBinHex converterBinHex, FileWriter writer, ArrayList<Integer> motBinaire)
+			throws IOException {
+		ArrayList<String> codeHexa;
+		codeHexa = converterBinHex.hexaconverteur(motBinaire);
+		for (String hex : codeHexa) {writer.write(hex);}
+		writer.write(" ");
+	}
+	
 	public static void main(String[] args) throws IOException{
 		AssembleurV2 assem = new AssembleurV2();
 		ConverterBinHex converterBinHex = new ConverterBinHex();
@@ -142,7 +152,15 @@ public class AssembleurV2 {
 		//parcours une seconde fois le fichier pour récupérer les requêtes
 		BufferedReader in2 = new BufferedReader(new FileReader("res/requeteBranch"));
 		String line2;
+		File codeAssembleur = new File("res/codeAssembleur");
+		codeAssembleur.createNewFile();
+		FileWriter writer = new FileWriter(codeAssembleur);
+		writer.write("v2.0 raw");
+		writer.write("\n");
+		writer.write("0000 ");
+		
 		while ((line2 = in2.readLine()) != null){
+			ArrayList<String> codeHexa = new ArrayList<String>();
 			String[] spltEs = line2.split(" ");
 			String[] registreCourSplit;
 			String[] spltHas;
@@ -190,6 +208,8 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 									
+									ecriture(converterBinHex, writer, motBinaire);
+									
 									motBinaire.clear();
 									break;
 									
@@ -221,6 +241,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 									
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -257,6 +278,7 @@ public class AssembleurV2 {
 											System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 											System.out.println("\n");
 											
+											ecriture(converterBinHex, writer, motBinaire);
 											motBinaire.clear();
 											break;
 										}
@@ -287,6 +309,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 									
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									breaker = false;
 									break;
@@ -325,7 +348,8 @@ public class AssembleurV2 {
 											System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
 											System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 											System.out.println("\n");
-							
+											
+											ecriture(converterBinHex, writer, motBinaire);
 											motBinaire.clear();
 											break;
 										}
@@ -355,7 +379,8 @@ public class AssembleurV2 {
 									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
-					
+									
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									breaker = false;
 									break;
@@ -393,6 +418,7 @@ public class AssembleurV2 {
 											System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 											System.out.println("\n");
 			
+											ecriture(converterBinHex, writer, motBinaire);
 											motBinaire.clear();
 											break;
 										}
@@ -423,6 +449,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 	
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									breaker = false;
 									break;
@@ -460,6 +487,7 @@ public class AssembleurV2 {
 											System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 											System.out.println("\n");
 											
+											ecriture(converterBinHex, writer, motBinaire);
 											motBinaire.clear();
 											break;
 
@@ -492,6 +520,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 									
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									breaker = false;
 									break;
@@ -529,6 +558,7 @@ public class AssembleurV2 {
 											System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 											System.out.println("\n");
 											
+											ecriture(converterBinHex, writer, motBinaire);
 											motBinaire.clear();
 											break;
 										}
@@ -560,6 +590,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 									
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									breaker = false;
 									break;
@@ -589,6 +620,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 									
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -615,6 +647,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 									
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -641,6 +674,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 									
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -666,7 +700,35 @@ public class AssembleurV2 {
 									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
-					
+									
+									ecriture(converterBinHex, writer, motBinaire);
+									motBinaire.clear();
+									break;
+									
+					case "SBCS" : 	System.out.println("SBCS");
+									spltHas = spltEs[spltEs.length-1].split(","); //on sait que les registres sont séparés par des ','
+
+									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.SBCS.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(DataProcessing.SBCS.getOpcode());
+									registre1 = Integer.parseInt(spltHas[0]); //RD
+									registre2 = Integer.parseInt(spltHas[1]); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+	
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									motBinaire.addAll(registreBinaire);
+	
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.print("registre = ("+registre2+" et "+registre1+") ");assem.affichBin(registreBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+									
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 					
@@ -693,6 +755,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 	
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -719,6 +782,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -748,6 +812,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 	
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -774,6 +839,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -800,6 +866,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -826,6 +893,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -852,6 +920,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -878,6 +947,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 					
@@ -904,6 +974,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 									
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -928,6 +999,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 					
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -952,6 +1024,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 	
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -976,6 +1049,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 								
@@ -1000,6 +1074,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 								
@@ -1024,6 +1099,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -1048,6 +1124,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -1072,6 +1149,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -1096,6 +1174,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -1120,6 +1199,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -1144,6 +1224,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -1168,6 +1249,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 									
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -1192,6 +1274,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 					
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -1216,6 +1299,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 	
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -1240,6 +1324,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -1264,6 +1349,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 									
@@ -1288,6 +1374,7 @@ public class AssembleurV2 {
 									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
 									System.out.println("\n");
 
+									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
 									break;
 
@@ -1297,7 +1384,10 @@ public class AssembleurV2 {
 																				
 		}
 		in2.close();
+		writer.close();
 	}
+
+	
 
 	
 	

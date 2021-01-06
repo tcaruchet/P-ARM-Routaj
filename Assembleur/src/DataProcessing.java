@@ -1,4 +1,4 @@
-package Assembleur;
+
 
 public enum DataProcessing {
 	ANDS("010000","0000"),

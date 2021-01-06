@@ -1,4 +1,4 @@
-package Assembleur;
+
 
 public enum ShAdSuMo {
 	ADDR("000","1100"),

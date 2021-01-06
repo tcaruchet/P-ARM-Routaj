@@ -1,4 +1,4 @@
-package Assembleur;
+
 
 public enum ConditionalBranch {
 	BEQ("1101","0000"),
