@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 LDR 1,1#2
 LDR 2,2#3
 CMP 1,2
@@ -10,3 +11,15 @@ else:
 ADDS 2,2#2
 B end
 end
+=======
+LDR 4,4#-1
+LDR 5,5#-1
+LDR 6,6#-1
+STR 6,6#1
+
+
+ADCS 0,1
+ADCS 4,5
+SBCS 5,6
+SBCS 0,1
+>>>>>>> 3695645936bee21ef8dbb50c8fb33af6be9cbc7b
