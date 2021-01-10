@@ -22,19 +22,30 @@ public class AssembleurV2 {
 		return nombreBinaire;
 	}
 	
-	public void fromIntToBinary (ArrayList<Integer> ab, int lines, int bit) {
+	public void fromIntToBinary (ArrayList<Integer> ab, int lines, int bit, boolean complement) {
+		ArrayList<Integer> temp = new ArrayList<Integer>();
+		//ArrayList<String> temp2 = new ArrayList<String>();
+		String temp2 = "";
+		//for (int a : ab) {
+		//	temp.add(Integer.toString(a));
+		//}
 		int binary;
 		if (lines < 0) { //dans le cas d'un nb négatif, on ajoute au bit le + a gauche
 			lines = -lines;
 			binary = Integer.parseInt(Integer.toBinaryString(lines));	//convertit la ligne de l'etiquette en binaire
-			ajoutZero(ab,lines,bit);										//ajoute les x 0 devant pour donner la valeur sur x bits, en fonction du nb de lignes en base 10
-			for (int i = 0; i<ab.size();i++) {
+			ajoutZero(temp,lines,bit);										//ajoute les x 0 devant pour donner la valeur sur x bits, en fonction du nb de lignes en base 10
+			for (int i = 0; i<temp.size();i++) {
 				//System.out.println("valeur ab avant set : "+ab.get(i));
 			}
-			ab.set(0, 1); //on met le bit de signe à 1
+			temp.set(0, 1); //on met le bit de signe à 1
 		}else {
 			binary = Integer.parseInt(Integer.toBinaryString(lines));	//convertit la ligne de l'etiquette en binaire
-			ajoutZero(ab,lines,bit);										//ajoute les x 0 devant pour donner la valeur sur x bits, en fonction du nb de lignes en base 10
+			ajoutZero(temp,lines,bit);										//ajoute les x 0 devant pour donner la valeur sur x bits, en fonction du nb de lignes en base 10
+			//System.out.println("pour "+lines);
+			for (int y : temp) {
+				//System.out.print(y);
+			}
+			//System.out.println();
 		}
 		String binaryS = String.valueOf(binary);
 		String[] binarySplt = binaryS.split("");
@@ -46,8 +57,23 @@ public class AssembleurV2 {
 			}
 		}
 		for (int i = 0; i < binarySpltArr.size(); i++) {					//on split pour avoir une valeur de type [1,1,1] plutot que [111]
-			ab.add(Integer.parseInt(binarySpltArr.get(i)));					//ajoute la valeur binaire des lignes dans la liste
+			temp.add(Integer.parseInt(binarySpltArr.get(i)));					//ajoute la valeur binaire des lignes dans la liste
 		}
+		
+		for (int a : temp) {
+			temp2 += (Integer.toString(a));
+			//System.out.print("add a temp2 = "+a);
+		}
+		 
+		String binaire = twosCompliment(temp2,complement);
+		//System.out.println("valeur binaire = "+binaire);
+		binarySplt = binaire.split("");
+		
+		for (int i = 0; i < binarySplt.length; i++) {					//on split pour avoir une valeur de type [1,1,1] plutot que [111]
+			ab.add(Integer.parseInt(binarySplt[i]));					//ajoute la valeur binaire des lignes dans la liste
+			//System.out.println("add "+ab.get(i));
+		}
+		
 	}
 	
 	public void ajoutZero(ArrayList<Integer> ab, int num, int bit) { //ajoute le bon nombre de zero en fonction du int entré pour donner une valeur binaire en x bits
@@ -71,34 +97,81 @@ public class AssembleurV2 {
 	public void affichXex(ArrayList<String> valeurBinaire) {
 		for (String p : valeurBinaire) {System.out.print(p);}
 	}
+	
+	public String twosCompliment(String bin, boolean complement) {
+		//System.out.println("YO ?"+bin);
+        String twos = "", ones = "";
+        String signe = String.valueOf(bin.charAt(0));
+        if (!complement) {
+        	//System.out.println("nop");
+        	return bin;
+        }
+        //System.out.println("CA VA CHANGER");
+        
+        if (String.valueOf(bin.charAt(0)).equals("0")) { //binaire positif, son complément à deux est le même
+        	//System.out.println("return same = "+bin);
+        	return bin;
+        }
+        for (int i = 1; i < bin.length(); i++) { //flip tout sauf le bit de signe
+            ones += flip(bin.charAt(i));
+        }
+        int number0 = Integer.parseInt(ones, 2);
+        StringBuilder builder = new StringBuilder(ones);
+        boolean b = false;
+        for (int i = ones.length() - 1; i > 0; i--) {
+            if (ones.charAt(i) == '1') {
+                builder.setCharAt(i, '0');
+            } else {
+                builder.setCharAt(i, '1');
+                b = true;
+                break;
+            }
+        }
+        if (!b)
+            builder.append("1", 0, 7);
 
-	public static int conditionalSwitch(ArrayList<Integer> ifArray, ArrayList<Integer> elseArray,ArrayList<Integer> thenArray, ArrayList<Integer> endArray, ArrayList<Integer> loopArray,String[] spltHas) {
+        twos = builder.toString();
+
+        return signe + twos; //ajoute le bit de signe
+    }
+
+// Returns '0' for '1' and '1' for '0'
+    public char flip(char c) {
+        return (c == '0') ? '1' : '0';
+    }
+
+	public static int conditionalSwitch(ArrayList<Integer> ifArray, ArrayList<Integer> elseArray,ArrayList<Integer> thenArray, ArrayList<Integer> endArray, ArrayList<Integer> loopArray,String[] spltHas, int ligne , int nbRequete, int ligneGlobale) {
 		int imm8 = 0;
 		switch(spltHas[0]) {
-		case "if" :		imm8 = ifArray.get(ifLines);
+		case "if" :		imm8 = (ifArray.get(ifLines) - ligneGlobale) -3; //on ajoute +1 pour avoir la valeur de ligne d'une instruction et non pas de l'étiquette
+						//if (imm8 < 0) {
+						//	imm8 += 1;
+						//}
 						ifLines++;
 						//elseLines++; //on incrémente les deux car si on choisit un if, cad qu'on ne choisit pas son else
 						break;
 					
-		case "else"	:	imm8 = elseArray.get(elseLines);
+		case "else"	:	imm8 = (elseArray.get(elseLines) - ligneGlobale -1) -3; //norme comme quoi un if a strictement une opération + B end, et est tout de suite suivie par un else
 						elseLines++;
 						//ifLines++;
 						break;
 						
-		case "then" : 	imm8 = thenArray.get(thenLines);
+		case "then" : 	imm8 = thenArray.get(thenLines) - ligneGlobale;
 						thenLines++;
 						break;
 		 				
-		case "end" : 	imm8 = endArray.get(endLines);
+		case "end" : 	imm8 = nbRequete + 1;
 						//endLines++; on n'a qu'un seul end
 						break;
 		  				
-		case "loop" : 	imm8 = loopArray.get(loopLines);
+		case "loop" : 	imm8 = (loopArray.get(loopLines) - ligne) -3; //-3 car l'offet de base est à +3
 						loopLines++;
 						break;
 		}
 		return imm8;
 	}
+	
+	
 	
 	public static void ecriture(ConverterBinHex converterBinHex, FileWriter writer, ArrayList<Integer> motBinaire)
 			throws IOException {
@@ -121,6 +194,7 @@ public class AssembleurV2 {
 		ArrayList<Integer> endArray = new ArrayList<Integer>();
 		ArrayList<Integer> loopArray = new ArrayList<Integer>();
 		int lignes = 0;
+		int nbRequete = 0;
 		
 		while ((line = in.readLine()) != null){ //on parcours une premier fois le fichier pour repérer les étiquettes
 			lignes++;
@@ -145,6 +219,8 @@ public class AssembleurV2 {
 				case "loop" : 	System.out.println("loop");
 								loopArray.add(lignes);
 								break;
+				default : nbRequete++; //si ce n'est pas une etiquette, c'est une requete
+				
 			}
 		}
 		in.close();
@@ -157,8 +233,9 @@ public class AssembleurV2 {
 		FileWriter writer = new FileWriter(codeAssembleur);
 		writer.write("v2.0 raw");
 		writer.write("\n");
-		writer.write("0000 ");
-		
+		//writer.write("0000 ");
+		int ligne = 0;
+		int ligneGlobale = 0;
 		while ((line2 = in2.readLine()) != null){
 			ArrayList<String> codeHexa = new ArrayList<String>();
 			String[] spltEs = line2.split(" ");
@@ -175,6 +252,7 @@ public class AssembleurV2 {
 			int registre1;
 			int registre2;
 			boolean breaker = false;
+			ligneGlobale++;
 		
 			for (int i = 0; i < spltEs.length; i++) {
 				//System.out.println("valeur j = "+j);
@@ -188,9 +266,9 @@ public class AssembleurV2 {
 									mnemoniqueBinaire = assem.fromStringToArray(LoadStore.LDR.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(LoadStore.LDR.getOpcode());
 									registre1 = Integer.parseInt(spltVir[1]); //le numero du registre
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //la valeur binaire du numero du registre
+									assem.fromIntToBinary(registreBinaire, registre1, 3,false); //la valeur binaire du numero du registre
 									imm8 = shift + registre1; //l'adresse imm8 est composé de la valeur du registre + du shift effectué [valeur apres le #]
-									assem.fromIntToBinary(immBinaire, imm8, 8); //la valeur binaire de l'adresse imm8
+									assem.fromIntToBinary(immBinaire, imm8, 8, true); //la valeur binaire de l'adresse imm8
 									
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -211,6 +289,7 @@ public class AssembleurV2 {
 									ecriture(converterBinHex, writer, motBinaire);
 									
 									motBinaire.clear();
+									ligne++;
 									break;
 									
 					case "STR" : 	System.out.println("STR");
@@ -221,9 +300,9 @@ public class AssembleurV2 {
 									mnemoniqueBinaire = assem.fromStringToArray(LoadStore.STR.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(LoadStore.STR.getOpcode());
 									registre1 = Integer.parseInt(spltVir[1]); //le numero du registre
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //la valeur binaire du numero du registre
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //la valeur binaire du numero du registre
 									imm8 = shift + registre1; //l'adresse imm8 est composé de la valeur du registre + du shift effectué [valeur apres le #]
-									assem.fromIntToBinary(immBinaire, imm8, 8); //la valeur binaire de l'adresse imm8
+									assem.fromIntToBinary(immBinaire, imm8, 8, true); //la valeur binaire de l'adresse imm8
 									
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -242,7 +321,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 									
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "LSLS" :	System.out.println("LSLS");
@@ -259,9 +338,9 @@ public class AssembleurV2 {
 											mnemoniqueBinaire = assem.fromStringToArray(Description.LSLS.getMnemonique());
 											opcodeBinaire = assem.fromStringToArray(Description.LSLS.getOpcode());
 											imm8 = Integer.parseInt(spltHas[1]); //la valeur du décalage [imm5]
-											assem.fromIntToBinary(immBinaire, imm8, 5); //valeur du decalage en binaire
-											assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
-											assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RD
+											assem.fromIntToBinary(immBinaire, imm8, 5, true); //valeur du decalage en binaire
+											assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
+											assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RM + RD
 											
 											//on ajoute tout pour constituer notre mot
 											motBinaire.addAll(mnemoniqueBinaire);
@@ -279,7 +358,7 @@ public class AssembleurV2 {
 											System.out.println("\n");
 											
 											ecriture(converterBinHex, writer, motBinaire);
-											motBinaire.clear();
+											motBinaire.clear();ligne++;
 											break;
 										}
 									}
@@ -292,8 +371,8 @@ public class AssembleurV2 {
 									
 									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.LSLS.getMnemonique()); //RD
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.LSLS.getOpcode()); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RD
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RM + RD
 									
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -310,7 +389,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 									
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									breaker = false;
 									break;
 
@@ -330,9 +409,9 @@ public class AssembleurV2 {
 											mnemoniqueBinaire = assem.fromStringToArray(Description.LSRS.getMnemonique());
 											opcodeBinaire = assem.fromStringToArray(Description.LSRS.getOpcode());
 											imm8 = Integer.parseInt(spltHas[1]); //la valeur du décalage [imm5]
-											assem.fromIntToBinary(immBinaire, imm8, 5); //valeur du decalage en binaire
-											assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
-											assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RD
+											assem.fromIntToBinary(immBinaire, imm8, 5, true); //valeur du decalage en binaire
+											assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
+											assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RM + RD
 								
 											//on ajoute tout pour constituer notre mot
 											motBinaire.addAll(mnemoniqueBinaire);
@@ -350,7 +429,7 @@ public class AssembleurV2 {
 											System.out.println("\n");
 											
 											ecriture(converterBinHex, writer, motBinaire);
-											motBinaire.clear();
+											motBinaire.clear();ligne++;
 											break;
 										}
 									}
@@ -363,8 +442,8 @@ public class AssembleurV2 {
 					
 									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.LSRS.getMnemonique()); //RD
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.LSRS.getOpcode()); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RD
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RM + RD
 				
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -382,7 +461,7 @@ public class AssembleurV2 {
 									
 									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
-									breaker = false;
+									breaker = false;ligne++;
 									break;
 									
 					case "ASRS" :	System.out.println("ASRS");
@@ -399,9 +478,9 @@ public class AssembleurV2 {
 											mnemoniqueBinaire = assem.fromStringToArray(Description.ASRS.getMnemonique());
 											opcodeBinaire = assem.fromStringToArray(Description.ASRS.getOpcode());
 											imm8 = Integer.parseInt(spltHas[1]); //la valeur du décalage [imm5]
-											assem.fromIntToBinary(immBinaire, imm8, 5); //valeur du decalage en binaire
-											assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
-											assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RD
+											assem.fromIntToBinary(immBinaire, imm8, 5, true); //valeur du decalage en binaire
+											assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
+											assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RM + RD
 				
 											//on ajoute tout pour constituer notre mot
 											motBinaire.addAll(mnemoniqueBinaire);
@@ -419,7 +498,7 @@ public class AssembleurV2 {
 											System.out.println("\n");
 			
 											ecriture(converterBinHex, writer, motBinaire);
-											motBinaire.clear();
+											motBinaire.clear();ligne++;
 											break;
 										}
 									}
@@ -432,8 +511,8 @@ public class AssembleurV2 {
 	
 									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.ASRS.getMnemonique()); //RD
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.ASRS.getOpcode()); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RD
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RM + RD
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -451,7 +530,7 @@ public class AssembleurV2 {
 	
 									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
-									breaker = false;
+									breaker = false;ligne++;
 									break;
 									
 					case "ADDS" :	System.out.println("ADDS"); // on ne sait pas encore si c'est add register ou add immediate
@@ -468,9 +547,9 @@ public class AssembleurV2 {
 											mnemoniqueBinaire = assem.fromStringToArray(ShAdSuMo.ADDI.getMnemonique());
 											opcodeBinaire = assem.fromStringToArray(ShAdSuMo.ADDI.getOpcode());
 											imm8 = Integer.parseInt(spltHas[1]); //la valeur du décalage [imm3]
-											assem.fromIntToBinary(immBinaire, imm8, 3); //valeur du decalage en binaire
-											assem.fromIntToBinary(registreBinaire, registre2, 3); //RN
-											assem.fromIntToBinary(registreBinaire, registre1, 3); //RN + RD
+											assem.fromIntToBinary(immBinaire, imm8, 3, true); //valeur du decalage en binaire
+											assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RN
+											assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RN + RD
 											
 											//on ajoute tout pour constituer notre mot
 											motBinaire.addAll(mnemoniqueBinaire);
@@ -488,7 +567,7 @@ public class AssembleurV2 {
 											System.out.println("\n");
 											
 											ecriture(converterBinHex, writer, motBinaire);
-											motBinaire.clear();
+											motBinaire.clear();ligne++;
 											break;
 
 										}
@@ -501,11 +580,11 @@ public class AssembleurV2 {
 									mnemoniqueBinaire = assem.fromStringToArray(ShAdSuMo.ADDR.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ShAdSuMo.ADDR.getOpcode());
 									registre1 = Integer.parseInt(spltHas[2]); //récupère l'indice du registre x, de cet indice en déduis sa valeur
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RM
 									registre1 = Integer.parseInt(spltHas[1]);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RN
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RM + RN
 									registre1 = Integer.parseInt(spltHas[0]);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RN + RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RM + RN + RD
 									
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -522,7 +601,7 @@ public class AssembleurV2 {
 									
 									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
-									breaker = false;
+									breaker = false;ligne++;
 									break;
 									
 					case "SUBS" : 	System.out.println("SUBS");
@@ -539,9 +618,9 @@ public class AssembleurV2 {
 											mnemoniqueBinaire = assem.fromStringToArray(ShAdSuMo.SUBI.getMnemonique());
 											opcodeBinaire = assem.fromStringToArray(ShAdSuMo.SUBI.getOpcode());
 											imm8 = Integer.parseInt(spltHas[1]); //la valeur du décalage [imm3]
-											assem.fromIntToBinary(immBinaire, imm8, 3); //valeur du decalage en binaire
-											assem.fromIntToBinary(registreBinaire, registre2, 3); //RN
-											assem.fromIntToBinary(registreBinaire, registre1, 3); //RN + RD
+											assem.fromIntToBinary(immBinaire, imm8, 3, true); //valeur du decalage en binaire
+											assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RN
+											assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RN + RD
 											
 											//on ajoute tout pour constituer notre mot
 											motBinaire.addAll(mnemoniqueBinaire);
@@ -560,6 +639,7 @@ public class AssembleurV2 {
 											
 											ecriture(converterBinHex, writer, motBinaire);
 											motBinaire.clear();
+											ligne++;
 											break;
 										}
 									}
@@ -571,11 +651,11 @@ public class AssembleurV2 {
 									mnemoniqueBinaire = assem.fromStringToArray(ShAdSuMo.SUBR.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ShAdSuMo.SUBR.getOpcode());
 									registre1 = Integer.parseInt(spltHas[2]); //récupère l'indice du registre x, de cet indice en déduis sa valeur
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RM
 									registre1 = Integer.parseInt(spltHas[1]);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RN
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RM + RN
 									registre1 = Integer.parseInt(spltHas[0]);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RN + RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RM + RN + RD
 									
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -592,7 +672,7 @@ public class AssembleurV2 {
 									
 									ecriture(converterBinHex, writer, motBinaire);
 									motBinaire.clear();
-									breaker = false;
+									breaker = false;ligne++;
 									break;
 									
 					case "MOVS" : 	System.out.println("MOV");
@@ -601,9 +681,9 @@ public class AssembleurV2 {
 									mnemoniqueBinaire = assem.fromStringToArray(ShAdSuMo.MOVE.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ShAdSuMo.MOVE.getOpcode());
 									registre1 = Integer.parseInt(spltHas[0]); //RD
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RD
 									imm8 = Integer.parseInt(spltHas[1]);
-									assem.fromIntToBinary(immBinaire, imm8, 8); //valeur du decalage en binaire
+									assem.fromIntToBinary(immBinaire, imm8, 8, true); //valeur du decalage en binaire
 									
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -621,7 +701,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 									
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "ANDS" : 	System.out.println("ANDS");
@@ -631,12 +711,12 @@ public class AssembleurV2 {
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.ANDS.getOpcode());
 									registre1 = Integer.parseInt(spltHas[0]); //RD
 									registre2 = Integer.parseInt(spltHas[1]); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
 									
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
 									motBinaire.addAll(opcodeBinaire);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RD
 									motBinaire.addAll(registreBinaire);
 									
 									//affichage
@@ -648,7 +728,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 									
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "EORS" : 	System.out.println("EORS");
@@ -658,12 +738,12 @@ public class AssembleurV2 {
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.EORS.getOpcode());
 									registre1 = Integer.parseInt(spltHas[0]); //RD
 									registre2 = Integer.parseInt(spltHas[1]); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
 									
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
 									motBinaire.addAll(opcodeBinaire);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RD
 									motBinaire.addAll(registreBinaire);
 									
 									//affichage
@@ -675,7 +755,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 									
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "ADCS" : 	System.out.println("ADCS");
@@ -685,12 +765,12 @@ public class AssembleurV2 {
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.ADCS.getOpcode());
 									registre1 = Integer.parseInt(spltHas[0]); //RD
 									registre2 = Integer.parseInt(spltHas[1]); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
 					
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
 									motBinaire.addAll(opcodeBinaire);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RD
 									motBinaire.addAll(registreBinaire);
 					
 									//affichage
@@ -702,7 +782,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 									
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "SBCS" : 	System.out.println("SBCS");
@@ -712,12 +792,12 @@ public class AssembleurV2 {
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.SBCS.getOpcode());
 									registre1 = Integer.parseInt(spltHas[0]); //RD
 									registre2 = Integer.parseInt(spltHas[1]); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
 	
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
 									motBinaire.addAll(opcodeBinaire);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RD
 									motBinaire.addAll(registreBinaire);
 	
 									//affichage
@@ -729,7 +809,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 									
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 					
 					case "RORS" : 	System.out.println("RORS");
@@ -739,12 +819,12 @@ public class AssembleurV2 {
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.RORS.getOpcode());
 									registre1 = Integer.parseInt(spltHas[0]); //RD
 									registre2 = Integer.parseInt(spltHas[1]); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
 	
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
 									motBinaire.addAll(opcodeBinaire);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RD
 									motBinaire.addAll(registreBinaire);
 	
 									//affichage
@@ -756,7 +836,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 	
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "TST" : 	System.out.println("TST");
@@ -766,12 +846,12 @@ public class AssembleurV2 {
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.TST.getOpcode());
 									registre1 = Integer.parseInt(spltHas[0]); //RD
 									registre2 = Integer.parseInt(spltHas[1]); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
 									motBinaire.addAll(opcodeBinaire);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RD
 									motBinaire.addAll(registreBinaire);
 
 									//affichage
@@ -783,7 +863,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "RSBS" :	System.out.println("RSBS");
@@ -795,8 +875,8 @@ public class AssembleurV2 {
 
 									mnemoniqueBinaire = assem.fromStringToArray(DataProcessing.RSBS.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.RSBS.getOpcode());
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RM + RD
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RM + RD
 		
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -813,7 +893,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 	
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "CMP" : 	System.out.println("CMP");
@@ -823,12 +903,12 @@ public class AssembleurV2 {
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.CMP.getOpcode());
 									registre1 = Integer.parseInt(spltHas[0]); //RD
 									registre2 = Integer.parseInt(spltHas[1]); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
 									motBinaire.addAll(opcodeBinaire);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RD
 									motBinaire.addAll(registreBinaire);
 
 									//affichage
@@ -840,7 +920,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "CMN" : 	System.out.println("CMN");
@@ -850,12 +930,12 @@ public class AssembleurV2 {
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.CMN.getOpcode());
 									registre1 = Integer.parseInt(spltHas[0]); //RD
 									registre2 = Integer.parseInt(spltHas[1]); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
 									motBinaire.addAll(opcodeBinaire);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RD
 									motBinaire.addAll(registreBinaire);
 
 									//affichage
@@ -867,7 +947,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "ORRS" : 	System.out.println("ORRS");
@@ -877,12 +957,12 @@ public class AssembleurV2 {
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.ORRS.getOpcode());
 									registre1 = Integer.parseInt(spltHas[0]); //RD
 									registre2 = Integer.parseInt(spltHas[1]); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
 									motBinaire.addAll(opcodeBinaire);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RD
 									motBinaire.addAll(registreBinaire);
 
 									//affichage
@@ -894,7 +974,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "MULS" : 	System.out.println("MULS");
@@ -904,12 +984,12 @@ public class AssembleurV2 {
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.MULS.getOpcode());
 									registre1 = Integer.parseInt(spltHas[0]); //RD
 									registre2 = Integer.parseInt(spltHas[1]); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
 									motBinaire.addAll(opcodeBinaire);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RD
 									motBinaire.addAll(registreBinaire);
 
 									//affichage
@@ -921,7 +1001,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "BICS" : 	System.out.println("BICS");
@@ -931,12 +1011,12 @@ public class AssembleurV2 {
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.BICS.getOpcode());
 									registre1 = Integer.parseInt(spltHas[0]); //RD
 									registre2 = Integer.parseInt(spltHas[1]); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
 									motBinaire.addAll(opcodeBinaire);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RD
 									motBinaire.addAll(registreBinaire);
 
 									//affichage
@@ -948,7 +1028,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 					
 					case "MVNS" : 	System.out.println("MVNS");
@@ -958,12 +1038,12 @@ public class AssembleurV2 {
 									opcodeBinaire = assem.fromStringToArray(DataProcessing.MVNS.getOpcode());
 									registre1 = Integer.parseInt(spltHas[0]); //RD
 									registre2 = Integer.parseInt(spltHas[1]); //RM
-									assem.fromIntToBinary(registreBinaire, registre2, 3); //RM
+									assem.fromIntToBinary(registreBinaire, registre2, 3, false); //RM
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
 									motBinaire.addAll(opcodeBinaire);
-									assem.fromIntToBinary(registreBinaire, registre1, 3); //RD
+									assem.fromIntToBinary(registreBinaire, registre1, 3, false); //RD
 									motBinaire.addAll(registreBinaire);
 
 									//affichage
@@ -975,7 +1055,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 									
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "ADD" : 	System.out.println("ADD");
@@ -984,7 +1064,7 @@ public class AssembleurV2 {
 									mnemoniqueBinaire = assem.fromStringToArray(Miscellaneous.ADD.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(Miscellaneous.ADD.getOpcode());
 									imm8 = Integer.parseInt(spltHas[1]); //On récupère la valeur de shift [valeur suivant le #]
-									assem.fromIntToBinary(immBinaire, imm8, 7); //la valeur binaire de l'adresse imm8
+									assem.fromIntToBinary(immBinaire, imm8, 7, true); //la valeur binaire de l'adresse imm8
 					
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1000,7 +1080,7 @@ public class AssembleurV2 {
 									System.out.println("\n");
 					
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "SUB"  : 	System.out.println("SUB");
@@ -1009,7 +1089,7 @@ public class AssembleurV2 {
 									mnemoniqueBinaire = assem.fromStringToArray(Miscellaneous.SUB.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(Miscellaneous.SUB.getOpcode());
 									imm8 = Integer.parseInt(spltHas[1]); //On récupère la valeur de shift [valeur suivant le #]
-									assem.fromIntToBinary(immBinaire, imm8, 7); //la valeur binaire de l'adresse imm8
+									assem.fromIntToBinary(immBinaire, imm8, 7, true); //la valeur binaire de l'adresse imm8
 	
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1025,15 +1105,16 @@ public class AssembleurV2 {
 									System.out.println("\n");
 	
 									ecriture(converterBinHex, writer, motBinaire);
-									motBinaire.clear();
+									motBinaire.clear();ligne++;
 									break;
 									
 					case "B" : 		System.out.println("B"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
 									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
-									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
 									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.B.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.B.getOpcode());
-									assem.fromIntToBinary(immBinaire, imm8, 8);
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
 								
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1054,11 +1135,12 @@ public class AssembleurV2 {
 									break;
 								
 					case "BEQ" : 	System.out.println("BEQ"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
 									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
-									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
 									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BEQ.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BEQ.getOpcode());
-									assem.fromIntToBinary(immBinaire, imm8, 8);
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
 					
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1079,11 +1161,12 @@ public class AssembleurV2 {
 									break;
 								
 					case "BNE" : 	System.out.println("BNE"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
 									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
-									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
 									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BNE.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BNE.getOpcode());
-									assem.fromIntToBinary(immBinaire, imm8, 8);
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
 		
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1104,11 +1187,12 @@ public class AssembleurV2 {
 									break;
 									
 					case "BCS" : 	System.out.println("BCS"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
 									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
-									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
 									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BCS.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BCS.getOpcode());
-									assem.fromIntToBinary(immBinaire, imm8, 8);
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1129,11 +1213,12 @@ public class AssembleurV2 {
 									break;
 									
 					case "BCC" : 	System.out.println("BCC"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
 									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
-									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
 									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BCC.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BCC.getOpcode());
-									assem.fromIntToBinary(immBinaire, imm8, 8);
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1154,11 +1239,12 @@ public class AssembleurV2 {
 									break;
 									
 					case "BMI" : 	System.out.println("BMI"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
 									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
-									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
 									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BMI.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BMI.getOpcode());
-									assem.fromIntToBinary(immBinaire, imm8, 8);
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1179,11 +1265,12 @@ public class AssembleurV2 {
 									break;
 									
 					case "BPL" : 	System.out.println("BPL"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
 									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
-									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
 									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BPL.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BPL.getOpcode());
-									assem.fromIntToBinary(immBinaire, imm8, 8);
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1204,11 +1291,12 @@ public class AssembleurV2 {
 									break;
 									
 					case "BVS" : 	System.out.println("BVS"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
 									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
-									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
 									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BVS.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BVS.getOpcode());
-									assem.fromIntToBinary(immBinaire, imm8, 8);
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1229,11 +1317,12 @@ public class AssembleurV2 {
 									break;
 									
 					case "BHI" : 	System.out.println("BHI"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
 									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
-									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
 									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BHI.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BHI.getOpcode());
-									assem.fromIntToBinary(immBinaire, imm8, 8);
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1254,11 +1343,12 @@ public class AssembleurV2 {
 									break;
 									
 					case "BLS" : 	System.out.println("BLS"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
 									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
-									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
 									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BLS.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BLS.getOpcode());
-									assem.fromIntToBinary(immBinaire, imm8, 8);
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
 									
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1279,11 +1369,12 @@ public class AssembleurV2 {
 									break;
 									
 					case "BGE" : 	System.out.println("BGE"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
 									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
-									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
 									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BGE.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BGE.getOpcode());
-									assem.fromIntToBinary(immBinaire, imm8, 8);
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
 					
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1304,11 +1395,12 @@ public class AssembleurV2 {
 									break;
 									
 					case "BLT" : 	System.out.println("BLT"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
 									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
-									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
 									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BLT.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BLT.getOpcode());
-									assem.fromIntToBinary(immBinaire, imm8, 8);
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
 	
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1329,11 +1421,12 @@ public class AssembleurV2 {
 									break;
 									
 					case "BGT" : 	System.out.println("BGT"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
 									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
-									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
 									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BGT.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BGT.getOpcode());
-									assem.fromIntToBinary(immBinaire, imm8, 8);
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
@@ -1354,11 +1447,12 @@ public class AssembleurV2 {
 									break;
 									
 					case "BLE" : 	System.out.println("BLE"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
 									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
-									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas);									
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
 									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BLE.getMnemonique());
 									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BLE.getOpcode());
-									assem.fromIntToBinary(immBinaire, imm8, 8);
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
 
 									//on ajoute tout pour constituer notre mot
 									motBinaire.addAll(mnemoniqueBinaire);
