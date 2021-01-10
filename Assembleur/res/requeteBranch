@@ -1,6 +1,8 @@
 LDR 4,4#-1
 LDR 5,5#-1
 LDR 6,6#-1
+STR 6,6#1
+
 
 ADCS 0,1
 ADCS 4,5
