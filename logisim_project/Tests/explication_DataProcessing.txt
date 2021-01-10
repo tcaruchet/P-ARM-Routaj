@@ -1,0 +1,19 @@
+LDR 1,1#1
+LDR 2,2#2
+
+ANDS 1,2 //effectue un ET binaire entre R1 et R2 et écrit le résultat dans R1 => 1
+EORS 1,2 //effectue un OU exclusif binaire entre R1 et R2 et écrit le résultat dans R1 => 6
+LSLS 1,2 //décale le contenu du registre R1 vers la gauche d'un nb donné par l'octet inférieur de R2, écrit le résultat dans R1 => 96 
+LSRS 1,2 //décale le contenu du registre R1 vers la droite d'un nb donné par l'octet inférieur de R2, écrit le résultat dans R1 => 0
+ASRS 1,2 //décale le contenu du registre R1 vers la droite d'un nb donné par l'octet inférieur de R2, le bit de signe de R2 et réinséré a gauche, écrit le résultat dans R1 => 0
+ADCS 1,2 //ajoute le contenu de R2 ainsi que le flag Carry à R1, écrit le résultat dans R1 => 8
+SBCS 1,2 //soustrait le contenu de R2 ainsi que le flag Carry à R1, écrit le résultat dans R1 => 1
+RORS 1,2 //pivote le contenue de R1 vers la droite d'un nb donné par l'octet inférieur de R2, écrit le résultat dans R1 => 402653184
+TST 1,2 //effectue un ET logique entre le contenue de R1 et R2, le résultat n'est pas écrit => rien
+RSBS 1,2 //soustrait le contenu de R2 à l'immédiat 0, écrit le résultat dans R1 => -5
+CMP 1,2 //soustrait le contenue de R2 à R1, le résultat n'est pas écrit => rien
+CMN 1,2 //ajoute le contenue de R2 à R1, le résultat n'est pas écrit => rien
+ORRS 1,2 //effectue un OU binaire entre le contenue de R2 et R1, écrit le résultat dans R1 => 7
+MULS 1,1,2 //multiplie le contenu de R1 avec R2, écrit le résultat dans R1 => 15
+BICS 1,2 //effectue un ET binaire entre le contenu de R1 et le complément de R2, écrit le résultat dans R1 => 2
+MVNS 1,2 //effectue un NON binaire sur le contenu de R2, écrit le résultat dans R1 -6 

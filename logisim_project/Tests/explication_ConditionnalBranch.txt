@@ -1,0 +1,67 @@
+LDR 1,1#2
+LDR 2,2#3
+
+CMP 1,2  //compare R1 et R1
+BEQ if   //Si R1 et R2 sont égaux
+BNE else //Si R1 et R2 ne sont pas égaux
+if: 
+	ADDS 1,1#2 //ajoute 1 à R1
+	B endIF	   //jump a la fin
+else: 
+	ADDS 2,2#3 //ajoute 1 à R2
+	B endELSE  //jump a la fin
+CMP 1,2
+BCS if	 //s'il y a une retenue
+BCC else //s'il n'y a pas de retenue
+if: 
+	ADDS 1,1#3
+	B endIF	   
+else: 
+	ADDS 2,2#1
+	B endELSE
+CMP 1,2
+BMI if   //si c'est négatif  oui 
+BPL else //si c'est positif
+if: 
+	ADDS 1,1#3
+	B endIF	   
+else: 
+	ADDS 2,2#1
+	B endELSE
+CMP 1,2
+BVS if 	 //s'il y a un dépassement de capacité
+BVC else //s'il n'y a pas de dépassement de capacité
+if: 
+	ADDS 1,1#3
+	B endIF	   
+else: 
+	ADDS 2,2#1
+	B endELSE
+CMP 1,2
+BHI if 	 //si c'est supérieur (non signé)   requette d8ff
+BLS else //si c'est inférieur ou égal (non signé)
+if: 
+	ADDS 1,1#3
+	B endIF	   
+else: 
+	ADDS 2,2#1
+	B endELSE
+CMP 1,2
+BGE if   //si c'est supérieur ou égal (signé)
+BLT else //si c'est inférieur (signé)
+if: 
+	ADDS 1,1#3
+	B endIF	   
+else: 
+	ADDS 2,2#1
+	B endELSE
+CMP 1,2
+BGT if   //si c'est supérieur (signé)
+BLE else //si c'est inférieur ou égal (signé)
+if: 
+	ADDS 1,1#3
+	B endIF	   
+else: 
+	ADDS 2,2#1
+	B endELSE
+end
