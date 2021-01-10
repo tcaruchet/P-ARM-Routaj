@@ -1,41 +1,12 @@
-afficher 0000
-LDR 0,0#2
-LDR 1,1#3
-STR 0,0#8
-STR 1,1#-100
-
-ADCS 0,1 
-
-loop: 
-CMP 0,1
-BEQ end
-ADDS 0,0#1
-B loop
-
-CMP 0,1
-
-BGE if
-BLT else
-
+LDR 1,1#2
+LDR 2,2#3
+CMP 1,2
+BEQ if
+BNE else
 if: 
-ADDS 1,1#200
+ADDS 1,1#3
 B end
-
 else: 
-ADDS 0,0#100
-B end 
-
-BEQ 1,2
-BNE 1,2
-BCS 1,2
-BCC 1,2
-BMI 1,2
-BPL 1,2
-BVS 1,2
-BHI 1,2
-BLS 1,2
-BGE 1,2
-BLT 1,2
-BGT 1,2
-BLE 1,2
+ADDS 2,2#2
+B end
 end

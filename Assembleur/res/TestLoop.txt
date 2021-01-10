@@ -1,0 +1,8 @@
+LDR 1,1#2
+LDR 2,2#3
+loop: 
+CMP 1,2
+BEQ end
+ADDS 1,1#1
+B loop
+end
