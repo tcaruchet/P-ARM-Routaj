@@ -1,0 +1,5 @@
+LDR 1,1#1
+ADD SP#2
+LDR 1,1#1
+SUB SP#1
+LDR 1,1#1

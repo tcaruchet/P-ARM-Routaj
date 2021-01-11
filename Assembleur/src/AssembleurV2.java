@@ -14,6 +14,8 @@ public class AssembleurV2 {
 	static int thenLines = 0;
 	static int endLines = 0;
 	static int loopLines = 0;
+	static final String FICHIER = "res/requeteShiftAddSubMov.txt";
+	static int nbLignesFichier = 0;
 	
 	public ArrayList<Integer> fromStringToArray(String valeur) {
 		String[] spliter = valeur.split(""); //pour passer de 111 à 1,1,1
@@ -167,6 +169,10 @@ public class AssembleurV2 {
 		case "loop" : 	imm8 = (loopArray.get(loopLines) - ligne) -3; //-3 car l'offet de base est à +3
 						loopLines++;
 						break;
+		case "endIF" :  imm8 = 2 - 3; //pour un if on skip la requete du esle
+						break;
+		case "endELSE" : imm8 = 1 - 3; // pour un else on exécute ensuite la requete qui suit
+						 break;
 		}
 		return imm8;
 	}
@@ -186,7 +192,7 @@ public class AssembleurV2 {
 		ConverterBinHex converterBinHex = new ConverterBinHex();
 		
 		//parcour le fichier pour récupérer les conditions (if/else)
-		BufferedReader in = new BufferedReader(new FileReader("res/requeteBranch"));
+		BufferedReader in = new BufferedReader(new FileReader(AssembleurV2.FICHIER));
 		String line;
 		ArrayList<Integer> ifArray = new ArrayList<Integer>();
 		ArrayList<Integer> elseArray = new ArrayList<Integer>();
@@ -195,9 +201,10 @@ public class AssembleurV2 {
 		ArrayList<Integer> loopArray = new ArrayList<Integer>();
 		int lignes = 0;
 		int nbRequete = 0;
-		
+		int lignesDuFichier = 0;
 		while ((line = in.readLine()) != null){ //on parcours une premier fois le fichier pour repérer les étiquettes
 			lignes++;
+			nbLignesFichier++;
 			String[] splt = line.split(":");
 			switch(splt[0]) {
 				case "if" :		System.out.println("if");
@@ -226,7 +233,7 @@ public class AssembleurV2 {
 		in.close();
 		
 		//parcours une seconde fois le fichier pour récupérer les requêtes
-		BufferedReader in2 = new BufferedReader(new FileReader("res/requeteBranch"));
+		BufferedReader in2 = new BufferedReader(new FileReader(AssembleurV2.FICHIER));
 		String line2;
 		File codeAssembleur = new File("res/codeAssembleur");
 		codeAssembleur.createNewFile();
@@ -1303,6 +1310,32 @@ public class AssembleurV2 {
 									motBinaire.addAll(opcodeBinaire);
 									motBinaire.addAll(immBinaire);
 
+									//affichage
+									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
+									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);
+									System.out.println("mot exécuté = "+spltHas[0]);
+									System.out.print("imm8 = ("+imm8+") ");assem.affichBin(immBinaire);
+									System.out.print("mot entier [binaire] = ");assem.affichBin(motBinaire);
+									System.out.print("mot entier [hexa] = ");assem.affichXex(converterBinHex.hexaconverteur(motBinaire));
+									System.out.println("\n");
+
+									ecriture(converterBinHex, writer, motBinaire);
+									motBinaire.clear();
+									break;
+									
+					case "BVC" : 	System.out.println("BVC"); //toujours vrai, utilisé pour relancer une boucle
+									ligne++;
+									spltHas = spltEs[spltEs.length-1].split(" "); //spltHas[0] = cond
+									imm8 = conditionalSwitch(ifArray, elseArray, thenArray, endArray, loopArray,spltHas, ligne, nbRequete, ligneGlobale);
+									mnemoniqueBinaire = assem.fromStringToArray(ConditionalBranch.BVC.getMnemonique());
+									opcodeBinaire = assem.fromStringToArray(ConditionalBranch.BVC.getOpcode());
+									assem.fromIntToBinary(immBinaire, imm8, 8, true);
+
+									//on ajoute tout pour constituer notre mot
+									motBinaire.addAll(mnemoniqueBinaire);
+									motBinaire.addAll(opcodeBinaire);
+									motBinaire.addAll(immBinaire);
+									
 									//affichage
 									System.out.print("mnemonique = ");assem.affichBin(mnemoniqueBinaire);
 									System.out.print("opcode = ");assem.affichBin(opcodeBinaire);

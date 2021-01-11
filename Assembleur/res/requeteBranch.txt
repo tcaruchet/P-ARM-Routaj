@@ -1,0 +1,66 @@
+LDR 1,1#2
+LDR 2,2#3
+CMP 1,2
+BEQ if
+BNE else
+if: 
+ADDS 1,1#3
+B endIF
+else: 
+ADDS 2,2#1
+B endELSE
+CMP 1,2
+BCS if
+BCC else
+if: 
+ADDS 1,1#3
+B endIF
+else: 
+ADDS 2,2#1
+B endELSE
+CMP 1,2
+BMI if
+BPL else
+if: 
+ADDS 1,1#3
+B endIF
+else: 
+ADDS 2,2#1
+B endELSE
+CMP 1,2
+BVS if
+BVC else
+if: 
+ADDS 1,1#3
+B endIF
+else: 
+ADDS 2,2#1
+B endELSE
+CMP 1,2
+BHI if
+BLS else
+if: 
+ADDS 1,1#3
+B endIF
+else: 
+ADDS 2,2#1
+B endELSE
+CMP 1,2
+BGE if
+BLT else
+if: 
+ADDS 1,1#3
+B endIF
+else: 
+ADDS 2,2#1
+B endELSE
+CMP 1,2
+BGT if
+BLE else
+if: 
+ADDS 1,1#3
+B endIF
+else: 
+ADDS 2,2#1
+B endELSE
+end
