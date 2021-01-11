@@ -1,0 +1,11 @@
+LDR 1,1#1 => 3
+LDR 2,2#2 => 5
+
+LSLS 1,2#1 //décale le contenu de R2 vers la gauche de 1 bit et ecrit dans R1 => 10
+LSRS 1,2#1 //décale le contenu de R2 vers la droite de 1 bit => 2
+ASRS 1,2#1 //décale le contenu de R2 vers la droite de 1 bit et le bit de signe est réinséré à gauche => 2
+ADDS 1,1,2 //ajoute le contenu de R1 à R2 et l'écrit dans le registre R1 => 7
+SUBS 1,1,2 //soustrait le contenu de R2 à R1 et l'écrit dans R1 => 2
+ADDS 1,2#1 //ajoute l'immédiat 1 à R2 et l'écrit dans r1 => 6
+SUBS 1,2#1 //soustrait l'immédiat 1 à R2 et l'écrit dnas r1 => 4
+MOVS 1#5 //insère l'immédiat 5 à R1 => 5

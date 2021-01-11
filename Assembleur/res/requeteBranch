@@ -1,0 +1,13 @@
+<<<<<<< HEAD
+LDR 1,1#2
+LDR 2,2#3
+CMP 1,2
+BEQ if
+BNE else
+if: 
+ADDS 1,1#3
+B end
+else: 
+ADDS 2,2#2
+B end
+end
